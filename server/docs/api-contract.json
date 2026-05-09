@@ -1,0 +1,112 @@
+{
+  "version": "0.2.0",
+  "lastUpdated": "2026-05-09",
+  "baseUrl": "http://localhost:5000",
+  "roles": ["child", "parent", "teacher"],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/",
+      "auth": false,
+      "allowedRoles": ["public"],
+      "requestBody": null,
+      "successStatus": 200,
+      "successShape": {
+        "success": true,
+        "message": "string"
+      },
+      "errors": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "auth": false,
+      "allowedRoles": ["public"],
+      "requestBody": {
+        "name": "string",
+        "email": "string",
+        "password": "string",
+        "role": "child|parent|teacher"
+      },
+      "successStatus": 201,
+      "successShape": {
+        "success": true,
+        "message": "string",
+        "data": {
+          "token": "string",
+          "user": {
+            "id": "number",
+            "name": "string",
+            "email": "string",
+            "role": "string"
+          }
+        }
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "<field> invalid"
+        },
+        {
+          "status": 409,
+          "message": "Email already registered"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "auth": false,
+      "allowedRoles": ["public"],
+      "requestBody": {
+        "email": "string",
+        "password": "string"
+      },
+      "successStatus": 200,
+      "successShape": {
+        "success": true,
+        "message": "string",
+        "data": {
+          "token": "string",
+          "user": {
+            "id": "number",
+            "name": "string",
+            "email": "string",
+            "role": "string"
+          }
+        }
+      },
+      "errors": [
+        {
+          "status": 401,
+          "message": "Invalid credentials"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "auth": true,
+      "allowedRoles": ["authenticated"],
+      "requestBody": null,
+      "successStatus": 200,
+      "successShape": {
+        "success": true,
+        "data": {
+          "user": {
+            "id": "number",
+            "name": "string",
+            "email": "string",
+            "role": "string"
+          }
+        }
+      },
+      "errors": [
+        {
+          "status": 401,
+          "message": "Authentication required"
+        }
+      ]
+    }
+  ]
+}

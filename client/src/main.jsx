@@ -1,13 +1,16 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HeroUIProvider } from '@heroui/react';
+import { AuthProvider } from './contexts/AuthContext.jsx';
 import App from './App.jsx';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HeroUIProvider>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </HeroUIProvider>
   </StrictMode>,
 );
