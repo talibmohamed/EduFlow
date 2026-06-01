@@ -6,6 +6,17 @@ import { todayUtc } from '../services/date.js';
 const router = express.Router();
 const levels = ['low', 'medium', 'high'];
 
+function mapDailyState(row) {
+  return {
+    id: row.id,
+    childId: row.child_id,
+    date: row.date,
+    energyLevel: row.energy_level,
+    focusLevel: row.focus_level,
+    createdAt: row.created_at,
+  };
+}
+
 router.use(requireAuth, requireRole('child'));
 
 router.post('/', async (req, res) => {
@@ -29,7 +40,7 @@ router.post('/', async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'Daily state saved',
-      data: { dailyState: result.rows[0] },
+      data: { dailyState: mapDailyState(result.rows[0]) },
     });
   } catch (error) {
     if (error.code === '23505') {
@@ -48,9 +59,10 @@ router.get('/me', async (req, res) => {
        WHERE child_id = $1 AND date = $2`,
       [req.user.id, todayUtc()],
     );
+    const row = result.rows[0];
     return res.status(200).json({
       success: true,
-      data: { dailyState: result.rows[0] ?? null },
+      data: { dailyState: row ? mapDailyState(row) : null },
     });
   } catch (error) {
     console.error(error);
