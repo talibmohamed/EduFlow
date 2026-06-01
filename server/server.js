@@ -3,6 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth.js';
 import dailyStateRouter from './routes/daily-state.js';
+import childRouter from './routes/child.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/daily-state', dailyStateRouter);
+app.use('/api/child', childRouter);
 
 app.listen(port, () => {
   console.log(`EduFlow API listening on port ${port}`);
