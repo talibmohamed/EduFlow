@@ -90,4 +90,47 @@ router.get('/adapted-homework', async (req, res) => {
   }
 });
 
+router.get('/homework/:id', async (req, res) => {
+  const homeworkId = Number(req.params.id);
+  if (!Number.isInteger(homeworkId)) {
+    return res.status(400).json({ success: false, message: 'invalid homework id' });
+  }
+
+  try {
+    const homeworkResult = await pool.query(
+      `SELECT id, title, description, subject,
+              to_char(due_date, 'YYYY-MM-DD') AS due_date,
+              estimated_minutes, difficulty, priority
+       FROM homework
+       WHERE id = $1 AND child_id = $2`,
+      [homeworkId, req.user.id],
+    );
+    const homework = homeworkResult.rows[0];
+    if (!homework) {
+      return res.status(404).json({ success: false, message: 'Homework not found' });
+    }
+
+    const tasksResult = await pool.query(
+      `SELECT id, title, status, task_order
+       FROM tasks WHERE homework_id = $1 ORDER BY task_order`,
+      [homeworkId],
+    );
+    const tasks = tasksResult.rows.map((task) => ({
+      id: task.id,
+      title: task.title,
+      status: task.status,
+      taskOrder: task.task_order,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: { homework: { ...mapHomeworkRow(homework), tasks } },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 export default router;
+
