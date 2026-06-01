@@ -3,6 +3,7 @@ import pool from '../db.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { todayUtc } from '../services/date.js';
 import { adaptWorkload } from '../services/adapt.js';
+import { buildProgressMessage } from '../services/progress.js';
 
 const router = express.Router();
 
@@ -125,6 +126,30 @@ router.get('/homework/:id', async (req, res) => {
     return res.status(200).json({
       success: true,
       data: { homework: { ...mapHomeworkRow(homework), tasks } },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+router.get('/progress', async (req, res) => {
+  const today = todayUtc();
+  try {
+    const result = await pool.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE status = 'completed') AS completed,
+         COUNT(*) FILTER (WHERE status = 'postponed') AS postponed
+       FROM task_progress
+       WHERE child_id = $1 AND date = $2`,
+      [req.user.id, today],
+    );
+    const completed = Number(result.rows[0].completed);
+    const postponed = Number(result.rows[0].postponed);
+
+    return res.status(200).json({
+      success: true,
+      data: { completed, postponed, message: buildProgressMessage(completed, postponed) },
     });
   } catch (error) {
     console.error(error);
