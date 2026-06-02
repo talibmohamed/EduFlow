@@ -1,31 +1,43 @@
-import { Button, Card, CardBody } from '@heroui/react';
-import { useNavigate } from 'react-router-dom';
+import { Card, CardBody } from '@heroui/react';
 import Header from '../../components/Header';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ChildDashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  function handleLogout() {
-    logout();
-    navigate('/login');
-  }
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-edusoft font-sans">
       <Header />
-      <main className="mx-auto max-w-5xl p-6">
-        <Card className="shadow-lg">
-          <CardBody className="p-8">
-            <h1 className="text-3xl font-bold text-edublue">Espace enfant</h1>
-            <p className="mt-3 text-lg text-eduink">Bonjour {user.name}</p>
-            <p className="mt-2 text-sm text-gray-500">Les fonctionnalités arrivent bientôt.</p>
-            <Button className="mt-6" color="primary" onPress={handleLogout}>
-              Logout
-            </Button>
-          </CardBody>
-        </Card>
+      <main className="mx-auto max-w-3xl p-6 space-y-8">
+        {/* Zone 1: État du jour */}
+        <section>
+          <h2 className="mb-4 text-2xl font-bold text-edublue">Comment te sens-tu aujourd'hui {user.name} ?</h2>
+          <Card className="border-none shadow-sm">
+            <CardBody className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-400">
+              [Le formulaire Énergie / Concentration viendra ici]
+            </CardBody>
+          </Card>
+        </section>
+
+        {/* Zone 2: Devoirs adaptés */}
+        <section>
+          <h2 className="mb-4 text-2xl font-bold text-edublue">Tes missions du jour</h2>
+          <Card className="border-none shadow-sm">
+            <CardBody className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-400">
+              [La liste des devoirs recommandés viendra ici]
+            </CardBody>
+          </Card>
+        </section>
+
+        {/* Zone 3: Progression positive */}
+        <section>
+          <h2 className="mb-4 text-2xl font-bold text-edublue">Ta progression</h2>
+          <Card className="border-none bg-green-50 shadow-sm">
+            <CardBody className="rounded-xl border-2 border-dashed border-green-200 p-8 text-center font-medium text-green-600">
+              [Les messages positifs et les tâches terminées viendront ici]
+            </CardBody>
+          </Card>
+        </section>
       </main>
     </div>
   );
