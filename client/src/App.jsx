@@ -8,6 +8,7 @@ import ChildDashboard from './pages/dashboards/ChildDashboard';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
 import TeacherDashboard from './pages/dashboards/TeacherDashboard';
 import CreateHomework from './pages/teacher/CreateHomework'; 
+import UiKit from './pages/UiKit';
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
           }
         />
 
+        <Route path="/ui-kit" element={<UiKit />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
