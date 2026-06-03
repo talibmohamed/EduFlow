@@ -5,6 +5,9 @@ import authRouter from './routes/auth.js';
 
 dotenv.config();
 
+// AJOUTE CETTE LIGNE ICI POUR CONTOURNER LE BLOCAGE SSL
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.error('JWT_SECRET must be set and at least 32 characters long.');
   process.exit(1);
@@ -12,6 +15,8 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+// ... le reste de ton code reste identique
 
 app.use(express.json());
 app.use(

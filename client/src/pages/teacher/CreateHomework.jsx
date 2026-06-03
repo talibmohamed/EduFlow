@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function CreateHomework() {
   // Simule la liste des élèves assignés à cet enseignant (récupérés via l'API plus tard)
+  const navigate = useNavigate();
   const myStudents = [
     { id: 1, name: 'Léo Martin' },
     { id: 2, name: 'Emma Dubois' },
@@ -167,7 +169,8 @@ export default function CreateHomework() {
               Annuler
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={() => navigate('/teacher/homework')}
               className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm transition"
             >
               Créer le devoir
