@@ -1,4 +1,4 @@
-Last updated: 2026-05-09
+Last updated: 2026-06-01
 
 ## Global Rules
 
@@ -127,3 +127,47 @@ Last updated: 2026-05-09
 
 - Common errors:
   - `401`, `Authentication required`.
+
+### POST /api/daily-state
+
+- Auth: yes. Allowed roles: `child`.
+- Request body: `{ "energy_level": "low|medium|high", "focus_level": "low|medium|high" }`.
+- Success: `201`, `{ success, message: "Daily state saved", data: { dailyState } }`.
+- Common errors:
+  - `400`, `energy_level invalid` / `focus_level invalid`.
+  - `409`, `Daily state already set for today` (one immutable state per UTC day).
+
+### GET /api/daily-state/me
+
+- Auth: yes. Allowed roles: `child`.
+- Success: `200`, `{ success, data: { dailyState } }`; `dailyState` is `null` if none today.
+
+### GET /api/child/adapted-homework
+
+- Auth: yes. Allowed roles: `child`.
+- Selects homework via the adaptation algorithm (energy/focus -> 1, 3, or all; priority desc then due date asc). Excludes fully completed and past-due homework. Each homework includes a nested `tasks` array.
+- Success: `200`, `{ success, data: { dailyState: { energyLevel, focusLevel }, homework: [...] } }`.
+- Common errors:
+  - `409`, `Daily state required for today`.
+
+### GET /api/child/homework/:id
+
+- Auth: yes. Allowed roles: `child`. Only the child's own homework.
+- Success: `200`, `{ success, data: { homework: { ..., tasks: [...] } } }`.
+- Common errors: `404`, `Homework not found`.
+
+### PATCH /api/tasks/:id/complete
+
+- Auth: yes. Allowed roles: `child`. Only tasks under the child's homework.
+- Sets `tasks.status = 'completed'` and writes one `task_progress` row for today.
+- Success: `200`, `{ success, message: "Task completed", data: { task } }`.
+- Common errors: `404`, `Task not found`.
+
+### PATCH /api/tasks/:id/postpone
+
+- Same as complete, with status `postponed`. Success message `Task postponed`.
+
+### GET /api/child/progress
+
+- Auth: yes. Allowed roles: `child`.
+- Success: `200`, `{ success, data: { completed, postponed, message } }` (today's counts + positive message).
