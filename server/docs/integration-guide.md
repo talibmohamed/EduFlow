@@ -1,4 +1,4 @@
-Last updated: 2026-05-09
+Last updated: 2026-06-03
 
 ## Base Setup
 
@@ -59,3 +59,56 @@ curl -X POST http://localhost:5000/api/auth/login \
 curl http://localhost:5000/api/auth/me \
   -H "Authorization: Bearer <jwt>"
 ```
+
+## Field Naming Convention (EDU-D child endpoints)
+
+- Request bodies use `snake_case` (e.g. `energy_level`, `focus_level`).
+- Response bodies use `camelCase` (e.g. `energyLevel`, `focusLevel`, `childId`, `createdAt`).
+- Do not reuse the keys you sent when reading the response back; map them.
+- This split is intentional: requests mirror the DB columns, responses match JS/JSON client conventions.
+
+## Child Endpoints (EDU-D)
+
+All child endpoints require a `child` JWT (`Authorization: Bearer <jwt>`). Full spec in `api-spec.md`.
+
+### Submit today's daily state
+
+`POST /api/daily-state`: once per day per child; returns `409` if already set today.
+
+```bash
+curl -X POST http://localhost:5000/api/daily-state \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"energy_level":"high","focus_level":"medium"}'
+```
+
+Response (note the `camelCase`):
+
+```json
+{
+  "success": true,
+  "message": "Daily state saved",
+  "data": {
+    "dailyState": {
+      "id": 1,
+      "childId": 7,
+      "date": "2026-06-03",
+      "energyLevel": "high",
+      "focusLevel": "medium",
+      "createdAt": "2026-06-03T08:00:00.000Z"
+    }
+  }
+}
+```
+
+### Read today's daily state
+
+`GET /api/daily-state/me`: returns `data.dailyState` (or `null` if not set yet today).
+
+### Other child endpoints
+
+- `GET /api/child/adapted-homework`: homework adapted to today's energy/focus (needs a daily state set today).
+- `GET /api/child/homework/:id`: one homework with its tasks.
+- `PATCH /api/tasks/:id/complete`: mark a task done.
+- `PATCH /api/tasks/:id/postpone`: postpone a task (no guilt).
+- `GET /api/child/progress`: completed/postponed counts + a positive message.
