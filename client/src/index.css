@@ -2,26 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Registered custom properties so the global "energy" re-tone interpolates
-   smoothly instead of snapping. Graceful no-op on older browsers. */
-@property --type-scale {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 1;
-}
-@property --lead {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 1.62;
-}
-@property --motion {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 1;
-}
-
 html {
   scroll-behavior: smooth;
+  /* Warm, paper-soft scrollbar (Firefox). */
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.8 0.03 80) transparent;
 }
 
 body {
@@ -29,1149 +14,294 @@ body {
   margin: 0;
 }
 
-/* ============================================================== LANDING === */
-/* Everything below is scoped to the marketing page via .ef-root.            */
-
-.ef-root {
-  --linen: #f8f4ec;
-  --clay: #ede5d8;
-  --ink: #1f2937;
-  --ink-soft: #434b57;
-  --ink-faint: rgba(31, 41, 55, 0.56);
-  --blue: #2563eb;
-  --green: #16a34a;
-  --honey: #facc15;
-  --shadow: rgba(40, 30, 20, 0.07);
-  --shadow-lg: rgba(40, 30, 20, 0.11);
-
-  --type-scale: 1;
-  --lead: 1.7;
-  --motion: 1;
-  --section-pad: clamp(76px, 11vh, 128px);
-
-  position: relative;
-  overflow-x: hidden;
-  min-height: 100vh;
-  background: var(--linen);
-  color: var(--ink);
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: calc(17px * var(--type-scale));
-  line-height: var(--lead);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  transition:
-    --motion 450ms ease,
-    background 600ms ease;
+/* Warm, paper-soft scrollbar (WebKit / Chromium). */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
 }
-
-/* The mood shift: the page warms and changes pace with the energy — but text
-   size, leading and layout stay put (no resizing or reflow on click). */
-.energy-low {
-  --linen: #fbf3e6;
-  --clay: #efe1cf;
-  --motion: 1.3;
-}
-.energy-high {
-  --blue: #1e5bff;
-  --green: #15a34a;
-  --motion: 0.78;
-}
-
-/* Display face for headlines, wordmark and numerals callouts. */
-.ef-head,
-.ef-hero-title,
-.ef-wordmark,
-.ef-quote,
-.ef-haiku,
-.ef-final-head,
-.ef-task-title,
-.ef-chapter h3,
-.ef-chapter-num,
-.ef-role h3,
-.ef-rail-label,
-.ef-slider-label strong,
-.ef-faq-q,
-.ef-footer-mark {
-  font-family: 'General Sans', 'Inter', system-ui, sans-serif;
-}
-
-.ef-root :where(section, main, [id]) {
-  scroll-margin-top: 84px;
-}
-
-.ef-tnum {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Accessible, visible focus everywhere. */
-.ef-root :focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.6);
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
-.ef-skip {
-  position: fixed;
-  top: -120px;
-  left: 16px;
-  z-index: 100;
-  padding: 12px 18px;
-  border-radius: 12px;
-  background: var(--blue);
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  transition: top 200ms ease;
-}
-.ef-skip:focus {
-  top: 16px;
-}
-
-/* Paper grain: static fractal noise, multiply-blended at ~4%. */
-.ef-grain {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 60;
-  pointer-events: none;
-  opacity: 0.045;
-  mix-blend-mode: multiply;
-}
-
-/* ------------------------------------------------------------------ nav --- */
-
-.ef-nav {
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 40;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 64px;
-  padding: 8px clamp(16px, 4vw, 32px);
-  transition:
-    background calc(var(--motion) * 300ms) ease,
-    box-shadow calc(var(--motion) * 300ms) ease,
-    backdrop-filter calc(var(--motion) * 300ms) ease;
-}
-.ef-nav.is-scrolled {
-  background: rgba(248, 244, 236, 0.72);
-  backdrop-filter: blur(16px) saturate(1.1);
-  box-shadow: 0 1px 0 var(--shadow);
-}
-
-.ef-wordmark {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-weight: 700;
-  font-size: calc(21px * var(--type-scale));
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  text-decoration: none;
-}
-.ef-mark {
-  color: var(--blue);
-  flex: none;
-}
-
-.ef-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ef-chip {
-  display: flex;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid rgba(40, 30, 20, 0.1);
-  border-radius: 999px;
-  background: rgba(240, 233, 220, 0.72);
-  box-shadow: inset 0 1px 2px var(--shadow);
-}
-.ef-chip-btn {
-  display: grid;
-  place-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  border: 0;
-  border-radius: 999px;
+::-webkit-scrollbar-track {
   background: transparent;
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    background calc(var(--motion) * 220ms) ease,
-    box-shadow calc(var(--motion) * 220ms) ease;
 }
-.ef-chip-btn.is-active {
-  background: #f4ecdb;
-  box-shadow: 0 4px 12px var(--shadow);
+::-webkit-scrollbar-thumb {
+  background: oklch(0.8 0.03 80);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.68 0.04 72);
 }
 
-/* ----------------------------------------------------- debossed buttons --- */
+/* ============================================================================
+   EduFlow landing — design system ported from flow-gentle-day.
+   Dawn-light, paper, gentle. Scoped to .eduflow-landing so the auth pages and
+   dashboards (HeroUI) are untouched.
+   ========================================================================== */
 
-.ef-btn {
+:root {
+  --radius: 0.75rem;
+
+  /* Brand palette as oklch channel triplets (so Tailwind /opacity works). */
+  --linen-c: 0.965 0.018 85; /* #F8F4EC */
+  --clay-c: 0.925 0.025 80; /* #EDE5D8 */
+  --ink-c: 0.31 0.025 255; /* #1F2937 charcoal */
+  --sky-c: 0.58 0.19 263; /* #2563EB morning blue */
+  --meadow-c: 0.62 0.17 145; /* #16A34A spring */
+  --honey-c: 0.86 0.16 95; /* #FACC15 whisper */
+  --card-c: 0.985 0.01 85;
+  --mutfg-c: 0.48 0.02 255;
+  --border-c: 0.88 0.022 80;
+
+  /* Full colours, for direct use in inline styles. */
+  --linen: oklch(var(--linen-c));
+  --clay: oklch(var(--clay-c));
+  --ink: oklch(var(--ink-c));
+  --sky: oklch(var(--sky-c));
+  --meadow: oklch(var(--meadow-c));
+  --honey: oklch(var(--honey-c));
+
+  --shadow-paper: 0 1px 2px rgba(40, 30, 20, 0.04), 0 8px 24px rgba(40, 30, 20, 0.06);
+  --shadow-paper-lg: 0 2px 4px rgba(40, 30, 20, 0.05), 0 24px 48px rgba(40, 30, 20, 0.08);
+}
+
+.eduflow-landing {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--linen);
+  color: var(--ink);
+  line-height: 1.6;
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  /* Subtle paper grain. */
+  background-image:
+    radial-gradient(rgba(40, 30, 20, 0.04) 1px, transparent 1px),
+    radial-gradient(rgba(40, 30, 20, 0.025) 1px, transparent 1px);
+  background-size:
+    3px 3px,
+    7px 7px;
+  background-position:
+    0 0,
+    1px 2px;
+}
+
+.eduflow-landing ::selection {
+  background: oklch(0.86 0.16 95 / 0.5);
+  color: var(--ink);
+}
+
+.font-display {
+  font-family: 'General Sans', 'Söhne', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+/* Hand-drawn honey underline that draws itself in under a hero word. */
+.swash {
+  position: relative;
+  white-space: nowrap;
+}
+.swash > svg {
+  position: absolute;
+  left: -3%;
+  bottom: -0.14em;
+  width: 106%;
+  height: 0.42em;
+  overflow: visible;
+  pointer-events: none;
+}
+.swash-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: swash-draw 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards;
+}
+@keyframes swash-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Global energy modes — re-tone the landing (toggled on the wrapper). */
+.eduflow-landing.energy-rest {
+  --linen-c: 0.97 0.025 80;
+  font-size: 115%;
+}
+.eduflow-landing.energy-rest * {
+  transition-duration: 700ms !important;
+}
+.eduflow-landing.energy-spark {
+  --linen-c: 0.97 0.02 85;
+  letter-spacing: -0.005em;
+}
+.eduflow-landing.energy-spark .accent-saturate {
+  filter: saturate(1.15);
+}
+
+/* Paper button — softly debossed. */
+.btn-paper {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 48px;
-  padding: 0 22px;
-  border: 1px solid transparent;
-  border-radius: 16px 15px 17px 14px;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 600;
-  font-size: calc(16px * var(--type-scale));
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  min-height: 44px;
   text-decoration: none;
   cursor: pointer;
   transition:
-    transform calc(var(--motion) * 180ms) ease,
-    box-shadow calc(var(--motion) * 200ms) ease,
-    background calc(var(--motion) * 200ms) ease;
-}
-.ef-btn:active {
-  transform: translateY(1px);
-}
-.ef-btn-lg {
-  min-height: 56px;
-  padding: 0 30px;
-  border-radius: 18px 16px 19px 15px;
-  font-size: calc(17px * var(--type-scale));
-}
-.ef-btn-primary {
-  background: var(--blue);
-  color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 12px 26px var(--shadow),
-    0 2px 4px var(--shadow);
-}
-.ef-btn-primary:hover {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    0 16px 32px var(--shadow-lg);
-}
-.ef-btn-ghost {
-  background: rgba(255, 255, 255, 0.55);
-  color: var(--ink);
-  border-color: rgba(40, 30, 20, 0.14);
+    transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 300ms;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 1px 2px var(--shadow);
+    inset 0 -2px 0 rgba(40, 30, 20, 0.08),
+    0 1px 2px rgba(40, 30, 20, 0.06);
 }
-.ef-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.85);
+.btn-paper:hover {
+  transform: translateY(-1px);
 }
-.ef-btn-light {
-  background: #fff;
-  color: var(--blue);
+.btn-paper:active {
+  transform: translateY(0);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 12px 30px rgba(40, 30, 20, 0.18);
+    inset 0 2px 4px rgba(40, 30, 20, 0.1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3);
 }
-
-/* ----------------------------------------------------------------- hero --- */
-
-.ef-hero {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100svh;
-  padding: clamp(120px, 17vh, 156px) clamp(20px, 5vw, 32px) clamp(60px, 10vh, 96px);
-  text-align: center;
-  background: linear-gradient(180deg, var(--linen) 0%, #f6efe1 52%, rgba(37, 99, 235, 0.1) 100%);
+.btn-primary {
+  background: var(--sky);
+  color: oklch(0.985 0.01 85);
 }
-
-.ef-hero-title {
-  margin: 0;
-  max-width: 15ch;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(46px, 8.4vw, 80px));
-  line-height: 0.99;
-  letter-spacing: -0.025em;
-}
-.ef-word {
-  display: inline-block;
-  margin: 0 0.14em;
-}
-/* hero headline words breathe in, one by one */
-.ef-hero-word {
-  display: inline-block;
-  margin: 0 0.14em;
-  animation: ef-breath 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.ef-swash {
-  position: relative;
-  white-space: nowrap;
-}
-.ef-swash svg {
-  position: absolute;
-  left: -2%;
-  bottom: -0.16em;
-  width: 104%;
-  height: 0.4em;
-  overflow: visible;
-}
-.ef-swash-path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-  animation: ef-draw 0.9s ease 1.4s both;
-}
-
-.ef-hero-sub {
-  margin: clamp(20px, 3vh, 30px) auto 0;
-  max-width: 58ch;
-  font-size: calc(var(--type-scale) * clamp(17px, 2vw, 20px));
-  line-height: var(--lead);
-  color: var(--ink-soft);
-}
-
-.ef-demo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(18px, 3vh, 28px);
-  width: 100%;
-  max-width: 620px;
-  margin: clamp(34px, 6vh, 56px) auto 0;
-}
-
-/* the three feelings — a centred row of selectable moods */
-.ef-feelings {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(20px, 7vw, 52px);
-}
-.ef-feelings {
-  min-height: 124px;
-  gap: clamp(28px, 8vw, 64px);
-}
-.ef-feeling {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  width: clamp(56px, 14vw, 74px);
-  height: clamp(56px, 14vw, 74px);
-  border: 0;
-  background: none;
-  font-size: clamp(40px, 11vw, 60px);
-  line-height: 1;
-  cursor: pointer;
-  animation: ef-float calc(var(--motion) * 4.6s) ease-in-out infinite;
-}
-/* the soft honey halo behind the chosen feeling */
-.ef-feeling-glow {
-  position: absolute;
-  inset: -24%;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(250, 204, 21, 0.4), transparent 68%);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.ef-feeling-glyph {
-  transform: scale(0.9);
-  opacity: 0.55;
-  will-change: transform, opacity;
-  transition:
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 320ms ease;
-}
-.ef-feeling:hover .ef-feeling-glyph {
-  opacity: 0.9;
-}
-.ef-feeling.is-active .ef-feeling-glyph {
-  transform: scale(1.25);
-  opacity: 1;
-}
-.ef-feeling.is-active .ef-feeling-glow {
-  opacity: 1;
-}
-.ef-feelings-hint {
-  margin: 0;
-  font-size: calc(var(--type-scale) * clamp(15px, 1.8vw, 17px));
-  color: var(--ink-soft);
-  text-align: center;
-}
-
-/* adaptive stack — the clean white day card */
-.ef-stack {
-  width: 100%;
-  padding: clamp(20px, 4vw, 30px);
-  border: 1px solid rgba(40, 30, 20, 0.06);
-  border-radius: 30px 28px 31px 27px;
-  background: #fffdf9;
-  box-shadow: 0 30px 80px var(--shadow), 0 6px 16px var(--shadow);
-  text-align: left;
-}
-.ef-stack-lg {
-  padding: clamp(22px, 4vw, 34px);
-  border-radius: 32px 29px 33px 28px;
-}
-.ef-stack-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: clamp(14px, 2vw, 20px);
-}
-.ef-stack-label,
-.ef-stack-count {
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(14px, 1.6vw, 15px));
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #6f6048;
-}
-.ef-stack-count {
-  flex: none;
-  white-space: nowrap;
-}
-.ef-tasks {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.ef-task {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: clamp(15px, 2.4vw, 20px);
-  border: 1px solid rgba(40, 30, 20, 0.06);
-  border-radius: 18px 17px 19px 16px;
-  background: #fffefb;
-  box-shadow: 0 4px 14px rgba(40, 30, 20, 0.04);
-}
-.ef-task-circle {
-  flex: none;
-}
-.ef-task-body {
-  flex: 1;
-  min-width: 0;
-}
-.ef-task-title {
-  display: block;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(17px, 2vw, 19px));
+.btn-ghost {
+  background: transparent;
   color: var(--ink);
-}
-.ef-task-meta {
-  display: block;
-  margin-top: 4px;
-  font-size: calc(var(--type-scale) * clamp(14px, 1.7vw, 15px));
-  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px oklch(0.4 0.02 255 / 0.18);
 }
 
-.ef-hero-cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: center;
-  margin-top: clamp(30px, 5vh, 40px);
-}
-.ef-hero-fine {
-  margin-top: 16px;
-  font-size: calc(16px * var(--type-scale));
-  color: var(--ink-soft);
+/* Card with a 1px paper imperfection. */
+.paper-card {
+  background: oklch(var(--card-c));
+  border-radius: 14px 13px 15px 14px;
+  box-shadow: var(--shadow-paper);
+  border: 1px solid oklch(0.88 0.022 80 / 0.6);
 }
 
-/* -------------------------------------------------------------- sections --- */
-
-.ef-section {
-  position: relative;
-  padding-block: var(--section-pad);
-  padding-inline: max(clamp(20px, 5vw, 32px), calc((100% - 1140px) / 2));
+/* Frosted nav. */
+.nav-frosted {
+  background: oklch(0.965 0.018 85 / 0.72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-bottom: 1px solid oklch(0.88 0.022 80 / 0.5);
 }
 
-.ef-problem {
-  background: var(--linen);
-}
-.ef-shift {
-  background: var(--clay);
-}
-.ef-how {
-  background: #fffdf8;
-}
-.ef-roles {
-  background: var(--linen);
-}
-.ef-promise {
-  background: var(--clay);
-}
-.ef-sample {
-  background: #fffdf8;
-}
-.ef-faq {
-  background: var(--linen);
+/* Hand-drawn pencil divider. */
+.pencil-divider {
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    oklch(0.31 0.025 255 / 0.18) 0 6px,
+    transparent 6px 9px,
+    oklch(0.31 0.025 255 / 0.12) 9px 14px,
+    transparent 14px 18px
+  );
+  border-radius: 2px;
 }
 
-.ef-head {
-  margin: 0;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(30px, 4.3vw, 50px));
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-}
-/* an accent word inside a heading — a sky-blue lift on the key idea */
-.ef-accent {
-  color: var(--blue);
-}
-
-/* page-turn band + pencil divider */
-.ef-pageturn {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 10px;
-  transform-origin: left center;
-  background: linear-gradient(90deg, transparent, rgba(40, 30, 20, 0.09), transparent);
-}
-.ef-pencil {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 32px);
-  color: rgba(40, 30, 20, 0.28);
-}
-
-/* 3 — problem */
-.ef-problem {
-  display: grid;
-  gap: clamp(36px, 5vw, 64px);
-}
-.ef-quote {
-  margin: 0;
-  font-weight: 500;
-  font-size: calc(var(--type-scale) * clamp(26px, 3vw, 32px));
-  line-height: 1.3;
-  letter-spacing: -0.015em;
-  color: var(--ink);
-}
-.ef-quote-accent {
-  font-style: italic;
-  color: var(--blue);
-}
-.ef-problem-list {
-  display: grid;
-  gap: clamp(22px, 3vw, 30px);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.ef-problem-item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 16px;
-  align-items: start;
-}
-.ef-problem-icon {
-  margin-top: 2px;
-  color: var(--ink);
-  opacity: 0.82;
-}
-.ef-problem-item p {
-  margin: 0;
-  color: var(--ink-soft);
-  line-height: var(--lead);
-}
-
-/* 4 — shift */
-.ef-shift {
-  text-align: center;
-}
-.ef-shift-head {
-  max-width: 17ch;
-  margin: 0 auto;
-}
-.ef-shift-sub {
-  margin: 18px auto clamp(34px, 5vh, 48px);
-  max-width: 52ch;
-  font-size: calc(var(--type-scale) * clamp(17px, 2vw, 19px));
-  color: var(--ink-soft);
-}
-.ef-rail {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: min(82vw, 420px);
-  gap: 18px;
-  padding: 6px 4px 22px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 4px;
-  cursor: grab;
-  scrollbar-width: thin;
-}
-.ef-rail.is-grabbing {
-  cursor: grabbing;
-}
-.ef-rail > * {
-  scroll-snap-align: center;
-}
-.ef-day-card {
-  padding: clamp(22px, 3vw, 28px);
-  border: 1px solid rgba(40, 30, 20, 0.06);
-  border-radius: 26px 24px 27px 23px;
-  background: #fffdf9;
-  box-shadow: 0 24px 64px var(--shadow), 0 6px 14px var(--shadow);
-  text-align: left;
-}
-.ef-day-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: clamp(16px, 2.4vw, 20px);
-}
-.ef-day-label {
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(13px, 1.5vw, 14px));
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #6f6048;
-}
-.ef-day-glyph {
-  font-size: 24px;
-  line-height: 1;
-}
-.ef-day-tasks {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.ef-day-task {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(248, 244, 236, 0.7);
-}
-.ef-day-task > span:last-child {
-  font-size: calc(var(--type-scale) * 15px);
-  color: var(--ink);
-}
-.ef-day-dot {
-  flex: none;
-  width: 16px;
-  height: 16px;
-  margin-top: 3px;
-  border: 2px solid var(--green);
-  border-radius: 999px;
-}
-.ef-day-note {
-  margin: clamp(18px, 2.4vw, 24px) 0 0;
-  font-style: italic;
-  font-size: calc(var(--type-scale) * clamp(14px, 1.7vw, 15px));
-  color: var(--ink-soft);
-}
-
-/* 5 — how */
-.ef-how {
-  display: grid;
-  gap: clamp(28px, 4vw, 48px);
-}
-.ef-rail-label {
-  margin: 0;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(17px, 2vw, 20px));
-  color: var(--ink-soft);
-}
-.ef-chapters {
-  display: grid;
-  gap: 16px;
-}
-.ef-chapter {
-  position: relative;
-  padding: clamp(22px, 3vw, 30px);
-  border: 1px solid rgba(40, 30, 20, 0.07);
-  border-radius: 24px 22px 25px 21px;
-  background: #fffaf2;
-  box-shadow: 0 16px 44px var(--shadow);
-}
-.ef-chapter-num {
-  display: block;
-  font-weight: 700;
-  font-size: calc(var(--type-scale) * clamp(38px, 5vw, 52px));
-  line-height: 1;
-  color: var(--blue);
-}
-.ef-chapter h3 {
-  margin: 10px 0 8px;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(20px, 2.4vw, 24px));
-  line-height: 1.18;
-  color: var(--ink);
-}
-.ef-chapter p {
-  margin: 0;
-  color: var(--ink-soft);
-  line-height: var(--lead);
-}
-
-/* looping mini-animations */
-.ef-mini {
-  --mini-dur: calc(var(--motion) * 1.9s);
-  display: block;
-  height: 40px;
-  margin: 18px 0;
-  color: var(--ink);
-}
-.ef-mini svg {
-  overflow: visible;
-}
-.ef-mini-checkin .d {
-  fill: var(--ink);
-  opacity: 0.18;
-}
-.ef-mini-checkin[data-play='true'] .d1 {
-  animation: ef-tap var(--mini-dur) ease-in-out infinite;
-}
-.ef-mini-checkin[data-play='true'] .d2 {
-  animation: ef-tap var(--mini-dur) ease-in-out 0.22s infinite;
-}
-.ef-mini-checkin[data-play='true'] .d3 {
-  animation: ef-tap var(--mini-dur) ease-in-out 0.44s infinite;
-}
-.ef-mini-adapt .bar {
-  fill: var(--ink);
-  opacity: 0.85;
-}
-.ef-mini-adapt[data-play='true'] .b1 {
-  animation: ef-thin var(--mini-dur) ease-in-out 0.2s infinite;
-}
-.ef-mini-adapt[data-play='true'] .b2 {
-  animation: ef-thin var(--mini-dur) ease-in-out 0.35s infinite;
-}
-.ef-mini-steps circle {
-  stroke: var(--ink);
-  stroke-width: 2;
-}
-.ef-mini-steps .ring {
-  stroke: var(--green);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-}
-.ef-mini-steps[data-play='true'] .ring {
-  animation: ef-fill var(--mini-dur) ease infinite;
-}
-.ef-mini-effort circle {
-  stroke: var(--ink);
-  stroke-width: 2;
-}
-.ef-mini-effort .tick {
-  stroke: var(--green);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-}
-.ef-mini-effort[data-play='true'] .tick {
-  animation: ef-check var(--mini-dur) ease infinite;
-}
-
-/* 6 — roles */
-.ef-roles-head {
-  margin: 0 auto clamp(40px, 6vh, 56px);
-  text-align: center;
-}
-.ef-roles-grid {
-  display: grid;
-  gap: clamp(16px, 2.5vw, 24px);
-}
-.ef-role {
-  padding: clamp(20px, 2.6vw, 26px);
-  border: 1px solid rgba(40, 30, 20, 0.07);
-  border-radius: 26px 24px 27px 23px;
-  background: #fffaf2;
-  box-shadow: 0 18px 50px var(--shadow);
-}
-.ef-art {
-  display: grid;
-  place-items: center;
-  margin-bottom: 20px;
-  aspect-ratio: 1 / 1.08;
-  border: 1px solid rgba(40, 30, 20, 0.07);
-  border-radius: 20px 18px 21px 17px;
-  background: var(--linen);
-  color: var(--ink);
-  overflow: hidden;
-}
-.ef-illu {
-  width: 78%;
-  height: auto;
-}
-.ef-role h3 {
-  margin: 0 0 8px;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(20px, 2.4vw, 25px));
-  color: var(--ink);
-}
-.ef-role p {
-  margin: 0;
-  color: var(--ink-soft);
-  line-height: var(--lead);
-}
-
-/* 7 — promise */
-.ef-promise {
-  display: grid;
-  place-items: center;
-  padding-block: clamp(168px, 26vh, 240px);
-  text-align: center;
-}
-.ef-haiku {
-  margin: 0;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(30px, 5.5vw, 60px));
-  line-height: 1.16;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-.ef-haiku span {
-  display: block;
-}
-.ef-haiku-accent {
-  color: var(--green);
-}
-
-/* 8 — sample */
-.ef-sample {
-  display: grid;
-  gap: clamp(36px, 5vw, 64px);
-  align-items: center;
-}
-.ef-sample-copy .ef-head {
-  text-align: left;
-}
-.ef-sample-copy p {
-  margin: 18px 0 0;
-  max-width: 46ch;
-  color: var(--ink-soft);
-  line-height: var(--lead);
-}
-.ef-slider-label {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin: clamp(28px, 4vh, 38px) 0 14px;
-  font-size: calc(16px * var(--type-scale));
-  color: var(--ink-soft);
-}
-.ef-slider-label strong {
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(18px, 2.2vw, 22px));
-  color: var(--ink);
-}
-.ef-slider {
+/* Range slider thumb for the interactive sample. */
+.eduflow-landing input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
-  height: 44px;
-  background: transparent;
-  cursor: pointer;
 }
-.ef-slider::-webkit-slider-runnable-track {
-  height: 8px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--clay), #e6d6bf);
-}
-.ef-slider::-moz-range-track {
-  height: 8px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--clay), #e6d6bf);
-}
-.ef-slider::-webkit-slider-thumb {
+.eduflow-landing input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 28px;
-  height: 28px;
-  margin-top: -10px;
-  border: 1px solid rgba(40, 30, 20, 0.12);
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -7px;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 6px 16px var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-.ef-slider::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(40, 30, 20, 0.12);
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 6px 16px var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-.ef-stations {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-}
-.ef-stations button {
-  padding: 6px;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: calc(15px * var(--type-scale));
-  color: var(--ink-soft);
+  background: oklch(var(--card-c));
+  border: 2px solid var(--sky);
+  box-shadow: 0 2px 6px rgba(40, 30, 20, 0.18);
   cursor: pointer;
 }
-.ef-stations button.is-active {
-  font-weight: 700;
-  color: var(--blue);
-}
-
-/* 9 — faq */
-.ef-faq .ef-head {
-  margin: 0 auto clamp(34px, 5vh, 48px);
-  text-align: center;
-}
-.ef-faq-list {
-  display: grid;
-  gap: 12px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-.ef-faq-item {
-  overflow: hidden;
-  border: 1px solid rgba(40, 30, 20, 0.08);
-  border-radius: 18px 17px 19px 16px;
-  background: #fffaf2;
-  box-shadow: 0 10px 30px var(--shadow);
-}
-.ef-faq-heading {
-  margin: 0;
-}
-.ef-faq-q {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-  min-height: 56px;
-  padding: clamp(16px, 2.4vw, 22px);
-  border: 0;
-  background: none;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(17px, 2vw, 20px));
-  text-align: left;
-  color: var(--ink);
+.eduflow-landing input[type='range']::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: oklch(var(--card-c));
+  border: 2px solid var(--sky);
+  box-shadow: 0 2px 6px rgba(40, 30, 20, 0.18);
   cursor: pointer;
 }
-.ef-chev {
-  flex: none;
-  color: var(--ink-faint);
-  transition: transform calc(var(--motion) * 240ms) ease;
-}
-.ef-faq-a p {
-  margin: 0;
-  max-width: 64ch;
-  padding: 0 clamp(16px, 2.4vw, 22px) clamp(18px, 2.4vw, 22px);
-  color: var(--ink-soft);
-  line-height: var(--lead);
-}
 
-/* 10 — final cta */
-.ef-final {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(20px, 3vh, 28px);
-  padding: clamp(100px, 16vh, 160px) clamp(20px, 5vw, 32px);
-  background: var(--blue);
-  color: #fdf9f1;
-  text-align: center;
-}
-.ef-final-head {
-  margin: 0;
-  max-width: 18ch;
-  font-weight: 600;
-  font-size: calc(var(--type-scale) * clamp(44px, 7vw, 72px));
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-}
-.ef-final-btn {
-  min-width: min(320px, 84vw);
-  min-height: 60px;
-  font-size: calc(18px * var(--type-scale));
-}
-.ef-final-fine {
-  margin: 0;
-  font-size: calc(16px * var(--type-scale));
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* 11 — footer */
-.ef-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 80px;
-  padding: 18px clamp(20px, 5vw, 32px);
-  border-top: 1px solid rgba(40, 30, 20, 0.12);
-  background: var(--linen);
-  font-size: calc(15px * var(--type-scale));
-  color: var(--ink-soft);
-}
-.ef-footer-mark {
-  font-weight: 700;
-  font-size: calc(17px * var(--type-scale));
-  color: var(--ink);
-}
-
-/* --------------------------------------------------------------- motion --- */
-
-@keyframes ef-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-@keyframes ef-breath {
+/* Animations. */
+@keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.98);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-@keyframes ef-float {
-  0%,
-  100% {
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-8px);
-  }
 }
-@keyframes ef-tap {
-  0%,
-  100% {
-    opacity: 0.18;
+@keyframes breath-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(4px);
   }
-  30% {
+  to {
     opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
   }
 }
-@keyframes ef-thin {
+@keyframes float-orbit {
   0%,
   100% {
-    opacity: 0.85;
+    transform: translate(0, 0) rotate(0);
   }
-  45%,
-  70% {
-    opacity: 0.1;
-  }
-}
-@keyframes ef-fill {
-  0% {
-    stroke-dashoffset: 1;
-  }
-  65%,
-  100% {
-    stroke-dashoffset: 0;
+  50% {
+    transform: translate(0, -6px) rotate(0.5deg);
   }
 }
-@keyframes ef-check {
-  0% {
-    stroke-dashoffset: 1;
+@keyframes page-sweep {
+  from {
+    transform: translateX(-100%);
   }
-  40%,
-  85% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: 1;
+  to {
+    transform: translateX(0);
   }
 }
 
-/* ------------------------------------------------------------ responsive --- */
-
-@media (min-width: 760px) {
-  .ef-problem {
-    grid-template-columns: 0.92fr 1.08fr;
-    align-items: start;
-  }
-  .ef-chapters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .ef-roles-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .ef-sample {
-    grid-template-columns: 1fr 1fr;
-  }
+.animate-rise {
+  animation: rise-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
-@media (min-width: 1080px) {
-  .ef-how {
-    grid-template-columns: 220px 1fr;
-  }
-  .ef-rail-label {
-    position: sticky;
-    top: 96px;
-    align-self: start;
-  }
+.animate-breath {
+  animation: breath-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
-@media (max-width: 560px) {
-  .ef-nav-login {
-    display: none;
-  }
-  .ef-hero-title {
-    letter-spacing: -0.02em;
-  }
-  .ef-hero-cta {
-    flex-direction: column;
-    align-items: stretch;
-    width: min(100%, 320px);
-  }
+.animate-float {
+  animation: float-orbit 6s ease-in-out infinite;
 }
-
-/* ----------------------------------------------------- reduced motion --- */
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .ef-root {
-    transition: none;
-  }
-  .ef-root *,
-  .ef-root *::before,
-  .ef-root *::after {
-    animation-duration: 0.001ms !important;
+  .eduflow-landing *,
+  .eduflow-landing *::before,
+  .eduflow-landing *::after {
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  /* Resolve drawn-in artwork to its finished state. */
-  .ef-swash-path,
-  .ef-mini .ring,
-  .ef-mini .tick {
-    stroke-dashoffset: 0 !important;
-    animation: none !important;
+  .animate-rise,
+  .animate-breath {
+    animation: fade-only 300ms ease-out both;
   }
-  .ef-mini .d,
-  .ef-mini .bar {
-    animation: none !important;
-    opacity: 0.85 !important;
+  @keyframes fade-only {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
