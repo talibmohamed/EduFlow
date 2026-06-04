@@ -1,6 +1,6 @@
 {
-  "version": "0.2.0",
-  "lastUpdated": "2026-05-09",
+  "version": "0.3.0",
+  "lastUpdated": "2026-06-01",
   "baseUrl": "http://localhost:5000",
   "roles": ["child", "parent", "teacher"],
   "endpoints": [
@@ -107,6 +107,34 @@
           "message": "Authentication required"
         }
       ]
-    }
+    },
+    { "method": "POST", "path": "/api/daily-state", "auth": true, "allowedRoles": ["child"],
+      "requestBody": { "energy_level": "low|medium|high", "focus_level": "low|medium|high" },
+      "successStatus": 201,
+      "successShape": { "success": true, "message": "string", "data": { "dailyState": "object" } },
+      "errors": [ { "status": 400, "message": "<field> invalid" }, { "status": 409, "message": "Daily state already set for today" } ] },
+    { "method": "GET", "path": "/api/daily-state/me", "auth": true, "allowedRoles": ["child"],
+      "requestBody": null, "successStatus": 200,
+      "successShape": { "success": true, "data": { "dailyState": "object|null" } }, "errors": [] },
+    { "method": "GET", "path": "/api/child/adapted-homework", "auth": true, "allowedRoles": ["child"],
+      "requestBody": null, "successStatus": 200,
+      "successShape": { "success": true, "data": { "dailyState": "object", "homework": "array" } },
+      "errors": [ { "status": 409, "message": "Daily state required for today" } ] },
+    { "method": "GET", "path": "/api/child/homework/:id", "auth": true, "allowedRoles": ["child"],
+      "requestBody": null, "successStatus": 200,
+      "successShape": { "success": true, "data": { "homework": "object" } },
+      "errors": [ { "status": 404, "message": "Homework not found" } ] },
+    { "method": "PATCH", "path": "/api/tasks/:id/complete", "auth": true, "allowedRoles": ["child"],
+      "requestBody": null, "successStatus": 200,
+      "successShape": { "success": true, "message": "string", "data": { "task": "object" } },
+      "errors": [ { "status": 404, "message": "Task not found" } ] },
+    { "method": "PATCH", "path": "/api/tasks/:id/postpone", "auth": true, "allowedRoles": ["child"],
+      "requestBody": null, "successStatus": 200,
+      "successShape": { "success": true, "message": "string", "data": { "task": "object" } },
+      "errors": [ { "status": 404, "message": "Task not found" } ] },
+    { "method": "GET", "path": "/api/child/progress", "auth": true, "allowedRoles": ["child"],
+      "requestBody": null, "successStatus": 200,
+      "successShape": { "success": true, "data": { "completed": "number", "postponed": "number", "message": "string" } },
+      "errors": [] }
   ]
 }
