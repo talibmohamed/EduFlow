@@ -1,37 +1,45 @@
-import { Button } from '@heroui/react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-edusoft font-sans">
+    <div className="flex min-h-screen flex-col selection:bg-[var(--sky)] selection:text-white" style={{ background: 'var(--linen)' }}>
       <Header />
-      <main className="mx-auto max-w-5xl p-6">
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      
+      <main className="mx-auto w-full max-w-5xl flex-1 p-6 lg:p-10">
+        
+        {/* En-tête du tableau de bord */}
+        <div className="mb-10 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center animate-rise">
           <div>
-            <h1 className="text-2xl font-bold text-edublue">Espace Enseignant</h1>
-            <p className="mt-1 text-eduink/80">Bonjour {user.name}</p>
+            <h1 className="font-display text-3xl sm:text-4xl text-ink leading-tight">
+              Espace Enseignant
+            </h1>
+            <p className="mt-2 text-[15px] text-muted-foreground">
+              Bonjour {user.name} — Voici le résumé de ton espace.
+            </p>
           </div>
-          <Button
-            color="primary"
-            onPress={() => navigate('/teacher/homework/create')}
+          
+          <Link
+            to="/teacher/homework/create"
+            className="btn-paper btn-primary flex-shrink-0"
           >
             + Créer un nouveau devoir
-          </Button>
+          </Link>
         </div>
 
-        <div className="rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="border-b border-gray-100 p-6">
-            <h2 className="text-lg font-semibold text-eduink">Mes élèves assignés</h2>
+        {/* Bloc Liste des élèves */}
+        <div className="paper-card animate-rise" style={{ animationDelay: '100ms' }}>
+          <div className="border-b border-border/40 p-6 sm:p-8">
+            <h2 className="font-display text-2xl text-ink">Mes élèves assignés</h2>
           </div>
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-12 text-center text-[15px] text-muted-foreground italic">
             [Liste des enfants et résumé hebdomadaire ici]
           </div>
         </div>
+        
       </main>
     </div>
   );
