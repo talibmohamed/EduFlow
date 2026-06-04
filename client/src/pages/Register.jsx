@@ -100,7 +100,7 @@ export default function Register() {
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
+       <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-ink/80">Rôle</label>
                 <Select
                   isRequired
@@ -109,9 +109,10 @@ export default function Register() {
                   selectedKeys={role}
                   onSelectionChange={setRole}
                   classNames={{ 
-                    trigger: "bg-white/60 border-border/40 hover:border-border h-12 shadow-sm transition-colors",
-                    value: "text-ink",
-                    popoverContent: "bg-[#FAFAFA] border border-border/40 shadow-xl rounded-xl p-1" // Léger off-white pour le menu
+                    // On sécurise ici avec des couleurs Tailwind natives pour éviter le bug d'affichage
+                    trigger: "bg-white border-slate-200 hover:border-slate-400 h-12 shadow-sm",
+                    value: "text-ink font-medium",
+                    popoverContent: "bg-white border border-slate-200 shadow-xl rounded-xl p-1"
                   }}
                 >
                   {roles.map((item) => (
