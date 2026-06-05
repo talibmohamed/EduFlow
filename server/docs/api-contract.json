@@ -1,6 +1,6 @@
 {
-  "version": "0.3.0",
-  "lastUpdated": "2026-06-01",
+  "version": "0.4.0",
+  "lastUpdated": "2026-06-05",
   "baseUrl": "http://localhost:5000",
   "roles": ["child", "parent", "teacher"],
   "endpoints": [
@@ -59,8 +59,10 @@
       "auth": false,
       "allowedRoles": ["public"],
       "requestBody": {
-        "email": "string",
-        "password": "string"
+        "oneOf": [
+          { "email": "string", "password": "string" },
+          { "username": "string", "pin": "string (4 digits)" }
+        ]
       },
       "successStatus": 200,
       "successShape": {
@@ -71,16 +73,17 @@
           "user": {
             "id": "number",
             "name": "string",
-            "email": "string",
+            "email": "string|null",
+            "username": "string|null",
             "role": "string"
           }
         }
       },
       "errors": [
-        {
-          "status": 401,
-          "message": "Invalid credentials"
-        }
+        { "status": 400, "message": "Provide either email+password or username+pin" },
+        { "status": 400, "message": "Provide only one credential pair" },
+        { "status": 400, "message": "PIN must be 4 digits" },
+        { "status": 401, "message": "Invalid credentials" }
       ]
     },
     {
@@ -96,7 +99,8 @@
           "user": {
             "id": "number",
             "name": "string",
-            "email": "string",
+            "email": "string|null",
+            "username": "string|null",
             "role": "string"
           }
         }

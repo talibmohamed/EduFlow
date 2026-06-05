@@ -6,11 +6,13 @@ dotenv.config();
 
 const password = 'Password123!';
 
+// V2.1: parents and teachers use email + password; children use username + 4-digit PIN.
+// PINs are stored in password_hash via bcrypt (same column reused).
 const users = [
-  { key: 'teacher', email: 'pierre@eduflow.test', name: 'Pierre Dubois', role: 'teacher' },
-  { key: 'parent', email: 'sophie@eduflow.test', name: 'Sophie Martin', role: 'parent' },
-  { key: 'lucas', email: 'lucas@eduflow.test', name: 'Lucas Martin', role: 'child' },
-  { key: 'emma', email: 'emma@eduflow.test', name: 'Emma Durand', role: 'child' },
+  { key: 'teacher', email: 'pierre@eduflow.test', username: null, name: 'Pierre Dubois', role: 'teacher', secret: password },
+  { key: 'parent', email: 'sophie@eduflow.test', username: null, name: 'Sophie Martin', role: 'parent', secret: password },
+  { key: 'lucas', email: null, username: 'lucas', name: 'Lucas Martin', role: 'child', secret: '2026' },
+  { key: 'emma', email: null, username: 'emma', name: 'Emma Durand', role: 'child', secret: '1234' },
 ];
 
 const homeworkItems = [
@@ -69,15 +71,15 @@ async function seed() {
     await client.query('DELETE FROM children_profiles');
     await client.query('DELETE FROM users');
 
-    const passwordHash = await bcrypt.hash(password, 10);
     const insertedUsers = {};
 
     for (const user of users) {
+      const secretHash = await bcrypt.hash(user.secret, 10);
       const result = await client.query(
-        `INSERT INTO users (name, email, password_hash, role)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO users (name, email, username, password_hash, role)
+         VALUES ($1, $2, $3, $4, $5)
          RETURNING id`,
-        [user.name, user.email, passwordHash, user.role],
+        [user.name, user.email, user.username, secretHash, user.role],
       );
       insertedUsers[user.key] = result.rows[0].id;
     }
@@ -147,8 +149,17 @@ async function seed() {
     console.log('Seed completed successfully');
     console.log('');
     console.log('Demo credentials:');
+    console.log('  Email + password (parents and teachers):');
     for (const user of users) {
-      console.log(`${user.role}: ${user.email} / ${password}`);
+      if (user.email) {
+        console.log(`    ${user.role}: ${user.email} / ${user.secret}`);
+      }
+    }
+    console.log('  Username + PIN (children):');
+    for (const user of users) {
+      if (user.username) {
+        console.log(`    ${user.role}: ${user.username} / ${user.secret}`);
+      }
     }
   } catch (error) {
     await client.query('ROLLBACK');

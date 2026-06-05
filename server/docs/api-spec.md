@@ -1,4 +1,4 @@
-Last updated: 2026-06-01
+Last updated: 2026-06-05
 
 ## Global Rules
 
@@ -74,15 +74,17 @@ Last updated: 2026-06-01
 
 - Auth: no.
 - Allowed roles: all.
-- Request body:
+- Request body: one of (exclusive):
 
 ```json
-{
-  "email": "string",
-  "password": "string"
-}
+{ "email": "string", "password": "string" }
 ```
 
+```json
+{ "username": "string", "pin": "string (4 digits)" }
+```
+
+- Parents and teachers use email + password. Children use username + 4-digit PIN.
 - Success: `200`.
 
 ```json
@@ -95,13 +97,18 @@ Last updated: 2026-06-01
       "id": 1,
       "name": "Pierre Dubois",
       "email": "pierre@eduflow.test",
+      "username": null,
       "role": "teacher"
     }
   }
 }
 ```
 
+- For a child the response shape is the same with `email: null` and `username: "lucas"`.
 - Common errors:
+  - `400`, `Provide either email+password or username+pin`.
+  - `400`, `Provide only one credential pair`.
+  - `400`, `PIN must be 4 digits`.
   - `401`, `Invalid credentials`.
 
 ### GET /api/auth/me
@@ -119,12 +126,14 @@ Last updated: 2026-06-01
       "id": 1,
       "name": "Pierre Dubois",
       "email": "pierre@eduflow.test",
+      "username": null,
       "role": "teacher"
     }
   }
 }
 ```
 
+- `email` is `null` for child users; `username` is `null` for parent/teacher users.
 - Common errors:
   - `401`, `Authentication required`.
 

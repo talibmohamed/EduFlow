@@ -1,10 +1,13 @@
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
-  email VARCHAR(160) UNIQUE NOT NULL,
+  email VARCHAR(160) UNIQUE,
+  username VARCHAR(60) UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   role VARCHAR(20) NOT NULL CHECK (role IN ('child','parent','teacher')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT users_email_or_username_check
+    CHECK (email IS NOT NULL OR username IS NOT NULL)
 );
 
 CREATE TABLE IF NOT EXISTS children_profiles (
@@ -67,3 +70,20 @@ CREATE INDEX IF NOT EXISTS idx_homework_child ON homework(child_id);
 CREATE INDEX IF NOT EXISTS idx_homework_teacher ON homework(teacher_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_homework ON tasks(homework_id);
 CREATE INDEX IF NOT EXISTS idx_task_progress_child_date ON task_progress(child_id, date);
+
+-- V2.1 migration for already-created dev DBs (idempotent):
+ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(60);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_unique
+  ON users(username) WHERE username IS NOT NULL;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'users_email_or_username_check'
+  ) THEN
+    ALTER TABLE users
+      ADD CONSTRAINT users_email_or_username_check
+      CHECK (email IS NOT NULL OR username IS NOT NULL);
+  END IF;
+END $$;

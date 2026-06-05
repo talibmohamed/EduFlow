@@ -1,4 +1,4 @@
-Last updated: 2026-06-03
+Last updated: 2026-06-05
 
 ## Base Setup
 
@@ -9,10 +9,18 @@ Last updated: 2026-06-03
 - `npm run start` starts the backend normally.
 - `npm run db:migrate` creates the database tables.
 - `npm run db:seed` loads demo data.
-- Seed password is `Password123!`.
-- Teacher seed login is `pierre@eduflow.test`.
-- Parent seed login is `sophie@eduflow.test`.
-- Child seed logins are `lucas@eduflow.test` and `emma@eduflow.test`.
+
+## Seed Credentials
+
+Parents and teachers (email + password = `Password123!`):
+
+- `pierre@eduflow.test` (teacher)
+- `sophie@eduflow.test` (parent)
+
+Children (username + 4-digit PIN):
+
+- `lucas` / `2026`
+- `emma`  / `1234`
 
 ## JWT Handling
 
@@ -45,13 +53,27 @@ curl -X POST http://localhost:5000/api/auth/register \
   -d '{"name":"Test Child","email":"test-child@example.test","password":"Password123!","role":"child"}'
 ```
 
-### Login
+### Login (parent or teacher)
 
 ```bash
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"pierre@eduflow.test","password":"Password123!"}'
 ```
+
+### Login (child)
+
+Children use a username + 4-digit PIN. The endpoint is the same:
+
+```bash
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"lucas","pin":"2026"}'
+```
+
+The response shape matches the email path; `user.email` is `null` and
+`user.username` is set. Sending both pairs together returns `400 Provide
+only one credential pair`.
 
 ### Me
 
