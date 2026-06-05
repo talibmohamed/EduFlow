@@ -172,7 +172,7 @@ export default function ChildDashboard() {
       <main className="mx-auto w-full max-w-4xl flex-1 p-6 lg:p-10 space-y-12">
 
         {error && (
-          <div className="paper-card p-4 text-center text-[15px] font-medium" style={{ color: 'var(--clay)' }} role="alert">
+          <div className="paper-card p-4 text-center text-[15px] font-medium" style={{ color: 'var(--ink)' }} role="alert">
             {error}
           </div>
         )}
@@ -287,7 +287,7 @@ export default function ChildDashboard() {
                             </div>
                             <div className={`text-sm mt-0.5 transition-all duration-300 ${isDone ? 'text-ink/30' : 'text-muted-foreground'}`}>
                               {mission.homeworkTitle} · {mission.subject}
-                              {isPostponed && <span className="ml-2 italic" style={{ color: 'var(--clay)' }}>Reportée</span>}
+                              {isPostponed && <span className="ml-2 italic text-muted-foreground">Reportée</span>}
                             </div>
                           </div>
 
