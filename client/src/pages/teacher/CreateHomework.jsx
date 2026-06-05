@@ -161,9 +161,9 @@ export default function CreateHomework() {
                   onChange={handleChange}
                   className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink shadow-sm transition-colors cursor-pointer"
                 >
-                  <option value="1">Haute (Très urgent)</option>
+                  <option value="3">Haute (Très urgent)</option>
                   <option value="2">Normale</option>
-                  <option value="3">Basse</option>
+                  <option value="1">Basse</option>
                 </select>
               </div>
             </div>

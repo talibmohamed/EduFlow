@@ -32,7 +32,7 @@ export default function ParentDashboard() {
         {/* En-tête du tableau de bord */}
         <div className="mb-10 animate-rise">
           <h1 className="font-display text-3xl sm:text-4xl text-ink leading-tight">
-            Vue d'ensemble — Famille <em className="not-italic" style={{ color: 'var(--meadow)' }}>{user.name}</em>
+            Le suivi de <em className="not-italic" style={{ color: 'var(--meadow)' }}>{childName}</em>
           </h1>
           <p className="mt-2 text-[15px] text-muted-foreground">
             Suis le rythme de {childName} et l'évolution de ses devoirs d'un simple coup d'œil.
