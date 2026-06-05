@@ -66,6 +66,9 @@ router.post('/homework', async (req, res) => {
   if (!childId || !title?.trim() || !subject?.trim() || !dueDate || !estimatedMinutes || !difficulty) {
     return res.status(400).json({ success: false, message: 'Missing required fields' });
   }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate) || isNaN(Date.parse(dueDate))) {
+    return res.status(400).json({ success: false, message: 'dueDate must be a valid date (YYYY-MM-DD)' });
+  }
   if (!['easy', 'medium', 'hard'].includes(difficulty)) {
     return res.status(400).json({ success: false, message: 'difficulty must be easy, medium, or hard' });
   }
@@ -154,12 +157,15 @@ router.get('/reports/:childId', async (req, res) => {
 
   try {
     const access = await pool.query(
-      `SELECT 1 FROM teacher_children WHERE teacher_id = $1 AND child_id = $2`,
+      `SELECT u.name FROM teacher_children tc
+       JOIN users u ON u.id = tc.child_id
+       WHERE tc.teacher_id = $1 AND tc.child_id = $2`,
       [req.user.id, childId],
     );
     if (access.rows.length === 0) {
       return res.status(403).json({ success: false, message: 'Child not assigned to this teacher' });
     }
+    const childName = access.rows[0].name;
 
     const totalsResult = await pool.query(
       `SELECT
@@ -204,6 +210,7 @@ router.get('/reports/:childId', async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
+        child: { id: childId, name: childName },
         totals: {
           completed: Number(totals.completed),
           postponed: Number(totals.postponed),

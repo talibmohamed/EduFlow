@@ -28,13 +28,9 @@ export default function TeacherReports() {
   useEffect(() => {
     async function load() {
       try {
-        const [reportRes, childrenRes] = await Promise.all([
-          api.get(`/api/teacher/reports/${childId}`),
-          api.get('/api/teacher/children'),
-        ]);
+        const reportRes = await api.get(`/api/teacher/reports/${childId}`);
         setData(reportRes.data.data);
-        const child = childrenRes.data.data.children.find((c) => String(c.id) === String(childId));
-        if (child) setChildName(child.name);
+        setChildName(reportRes.data.data.child.name);
       } catch (err) {
         if (err.response?.status === 403) {
           setError("Cet élève n'est pas assigné à votre classe.");

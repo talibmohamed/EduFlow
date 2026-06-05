@@ -6,6 +6,7 @@ export default function CreateHomework() {
   const navigate = useNavigate();
   const [myStudents, setMyStudents] = useState([]);
   const [submitError, setSubmitError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     api.get('/api/teacher/children').then((res) => {
@@ -31,6 +32,7 @@ export default function CreateHomework() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
+    setSubmitting(true);
     try {
       await api.post('/api/teacher/homework', {
         childId: Number(formData.childId),
@@ -45,6 +47,7 @@ export default function CreateHomework() {
       navigate('/teacher/dashboard');
     } catch (err) {
       setSubmitError(err.response?.data?.message || 'Une erreur est survenue.');
+      setSubmitting(false);
     }
   };
 
@@ -212,9 +215,10 @@ export default function CreateHomework() {
               </button>
               <button
                 type="submit"
-                className="btn-paper btn-primary w-full sm:w-auto"
+                disabled={submitting}
+                className="btn-paper btn-primary w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Créer le devoir
+                {submitting ? 'Création en cours…' : 'Créer le devoir'}
               </button>
             </div>
             
