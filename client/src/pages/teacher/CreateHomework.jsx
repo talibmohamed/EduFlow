@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../lib/api';
 
 export default function CreateHomework() {
   const navigate = useNavigate();
-  
-  // Simule la liste des élèves assignés (à remplacer par l'API)
-  const myStudents = [
-    { id: 1, name: 'Léo Martin' },
-    { id: 2, name: 'Emma Dubois' },
-    { id: 3, name: 'Hugo Leroy' },
-  ];
+  const [myStudents, setMyStudents] = useState([]);
+  const [submitError, setSubmitError] = useState(null);
+
+  useEffect(() => {
+    api.get('/api/teacher/children').then((res) => {
+      setMyStudents(res.data.data.children);
+    });
+  }, []);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -26,12 +28,24 @@ export default function CreateHomework() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Devoir à envoyer au backend :', formData);
-    // Ici on appellera : fetch('/api/teacher/homework', { method: 'POST', body: JSON.stringify(formData) })
-    alert("Le devoir a été créé avec succès ! Ses sous-tâches seront générées automatiquement.");
-    navigate('/teacher/dashboard');
+    setSubmitError(null);
+    try {
+      await api.post('/api/teacher/homework', {
+        childId: Number(formData.childId),
+        title: formData.title,
+        description: formData.description,
+        subject: formData.subject,
+        dueDate: formData.dueDate,
+        estimatedMinutes: Number(formData.estimatedMinutes),
+        difficulty: formData.difficulty,
+        priority: Number(formData.priority),
+      });
+      navigate('/teacher/dashboard');
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || 'Une erreur est survenue.');
+    }
   };
 
   return (
@@ -180,6 +194,12 @@ export default function CreateHomework() {
                 className="w-full p-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink placeholder:text-muted-foreground shadow-sm transition-colors resize-y"
               ></textarea>
             </div>
+
+            {submitError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {submitError}
+              </div>
+            )}
 
             {/* Boutons d'action */}
             <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-border/40">

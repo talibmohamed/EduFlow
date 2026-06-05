@@ -7,7 +7,8 @@ import Register from './pages/Register';
 import ChildDashboard from './pages/dashboards/ChildDashboard';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
 import TeacherDashboard from './pages/dashboards/TeacherDashboard';
-import CreateHomework from './pages/teacher/CreateHomework'; 
+import CreateHomework from './pages/teacher/CreateHomework';
+import TeacherReports from './pages/teacher/TeacherReports';
 import UiKit from './pages/UiKit';
 
 export default function App() {
@@ -52,6 +53,15 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={['teacher']}>
               <CreateHomework />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teacher/reports/:childId"
+          element={
+            <ProtectedRoute allowedRoles={['teacher']}>
+              <TeacherReports />
             </ProtectedRoute>
           }
         />
