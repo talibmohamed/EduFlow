@@ -133,6 +133,19 @@ export default function Login() {
               Créer un compte
             </Link>
           </p>
+
+          <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border/40" aria-hidden />
+            <span className="uppercase tracking-[0.18em]">ou</span>
+            <span className="h-px flex-1 bg-border/40" aria-hidden />
+          </div>
+
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Tu es un enfant ?{' '}
+            <Link className="font-medium transition-colors hover:opacity-80" style={{ color: 'var(--meadow)' }} to="/child-login">
+              Se connecter avec un identifiant
+            </Link>
+          </p>
         </div>
       </main>
     </div>

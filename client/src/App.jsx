@@ -3,6 +3,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Forbidden from './pages/Forbidden';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
+import ChildLogin from './pages/ChildLogin';
 import Register from './pages/Register';
 import ChildDashboard from './pages/dashboards/ChildDashboard';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
@@ -16,6 +17,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/child-login" element={<ChildLogin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/403" element={<Forbidden />} />
         
