@@ -1,4 +1,4 @@
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ## Current State
 
@@ -41,13 +41,18 @@ Last updated: 2026-06-05
 - `requireAuth` verifies Bearer tokens.
 - `requireRole` blocks users outside allowed roles.
 
+### Parent
+
+- `GET /api/parent/children` lists the calling parent's children with their profile (age, class_level, username).
+- `POST /api/parent/children` creates a child (`role: child`, `email: null`, `username`, `password_hash = bcrypt(pin)`) and an auto-linked `children_profiles` row in one transaction. Returns `409` if the username is already taken.
+
 ## Pending Features
 
 - Daily state endpoints.
 - Homework CRUD.
 - Adaptation algorithm.
 - Child task complete and postpone actions.
-- Parent dashboard data.
+- Parent dashboard data (energy history, weekly progress).
 - Teacher reports.
 - Weekly count.
 

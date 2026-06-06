@@ -1,4 +1,4 @@
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ## Base Setup
 
@@ -134,3 +134,27 @@ Response (note the `camelCase`):
 - `PATCH /api/tasks/:id/complete`: mark a task done.
 - `PATCH /api/tasks/:id/postpone`: postpone a task (no guilt).
 - `GET /api/child/progress`: completed/postponed counts + a positive message.
+
+## Parent Endpoints (V2.2)
+
+All parent endpoints require a `parent` JWT.
+
+### List my children
+
+```bash
+curl http://localhost:5000/api/parent/children \
+  -H "Authorization: Bearer <parent-jwt>"
+```
+
+### Add a child
+
+```bash
+curl -X POST http://localhost:5000/api/parent/children \
+  -H "Authorization: Bearer <parent-jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Léa Martin","username":"lea","pin":"4321","age":9,"class_level":"CE2"}'
+```
+
+The child is auto-linked to the calling parent via `children_profiles.parent_id`. The username is lowercased and validated against `^[a-z0-9_-]{3,60}$`. The PIN is stored as a bcrypt hash in `password_hash` (same column reused). The child can then log in via `POST /api/auth/login` with `{username, pin}`.
+
+Duplicate usernames return `409 Username already taken`.

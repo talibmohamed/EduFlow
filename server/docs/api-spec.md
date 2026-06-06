@@ -1,4 +1,4 @@
-Last updated: 2026-06-05
+Last updated: 2026-06-06
 
 ## Global Rules
 
@@ -180,3 +180,68 @@ Last updated: 2026-06-05
 
 - Auth: yes. Allowed roles: `child`.
 - Success: `200`, `{ success, data: { completed, postponed, message } }` (today's counts + positive message).
+
+### GET /api/parent/children
+
+- Auth: yes. Allowed roles: `parent`.
+- Returns the calling parent's children (children with `children_profiles.parent_id = req.user.id`).
+- Success: `200`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "children": [
+      {
+        "id": 7,
+        "name": "Lucas Martin",
+        "username": "lucas",
+        "age": 11,
+        "classLevel": "6ème"
+      }
+    ]
+  }
+}
+```
+
+### POST /api/parent/children
+
+- Auth: yes. Allowed roles: `parent`.
+- Creates a child user (`role: child`, `email: null`, `username`, `password_hash = bcrypt(pin)`) and a `children_profiles` row with `parent_id = req.user.id`. Transactional.
+- Request body:
+
+```json
+{
+  "name": "string (2-120)",
+  "username": "string (3-60, [a-z0-9_-])",
+  "pin": "string (4 digits)",
+  "age": "integer 4-18 (optional)",
+  "class_level": "string (optional, <=40)"
+}
+```
+
+- Success: `201`.
+
+```json
+{
+  "success": true,
+  "message": "Child created",
+  "data": {
+    "child": {
+      "id": 12,
+      "name": "Léa Martin",
+      "username": "lea",
+      "age": 9,
+      "classLevel": "CE2"
+    }
+  }
+}
+```
+
+- Common errors:
+  - `400`, `name invalid`.
+  - `400`, `username invalid`.
+  - `400`, `PIN must be 4 digits`.
+  - `400`, `age invalid (must be 4-18)`.
+  - `400`, `class_level invalid`.
+  - `409`, `Username already taken`.
