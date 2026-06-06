@@ -39,9 +39,12 @@ function publicUser(row) {
     id: row.id,
     name: row.name,
     email: row.email,
+    username: row.username,
     role: row.role,
   };
 }
+
+const pinPattern = /^\d{4}$/;
 
 router.post('/register', async (req, res) => {
   const validationError = validateRegister(req.body);
@@ -59,7 +62,7 @@ router.post('/register', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO users (name, email, password_hash, role)
        VALUES ($1, $2, $3, $4)
-       RETURNING id, name, email, role`,
+       RETURNING id, name, email, username, role`,
       [name, email, passwordHash, role],
     );
     const user = publicUser(result.rows[0]);
@@ -81,23 +84,50 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
-  const password = typeof req.body.password === 'string' ? req.body.password : '';
+  // V2.1: accept EITHER {email,password} (parents/teachers) OR {username,pin} (children).
+  const emailRaw = typeof req.body.email === 'string' ? req.body.email.trim() : '';
+  const passwordRaw = typeof req.body.password === 'string' ? req.body.password : '';
+  const usernameRaw = typeof req.body.username === 'string' ? req.body.username.trim() : '';
+  const pinRaw = typeof req.body.pin === 'string' ? req.body.pin : '';
+
+  const usingEmail = emailRaw.length > 0 && passwordRaw.length > 0;
+  const usingUsername = usernameRaw.length > 0 && pinRaw.length > 0;
+
+  if (!usingEmail && !usingUsername) {
+    return res.status(400).json({
+      success: false,
+      message: 'Provide either email+password or username+pin',
+    });
+  }
+  if (usingEmail && usingUsername) {
+    return res.status(400).json({
+      success: false,
+      message: 'Provide only one credential pair',
+    });
+  }
+  if (usingUsername && !pinPattern.test(pinRaw)) {
+    return res.status(400).json({
+      success: false,
+      message: 'PIN must be 4 digits',
+    });
+  }
 
   try {
-    const result = await pool.query(
-      'SELECT id, name, email, password_hash, role FROM users WHERE email = $1',
-      [email],
-    );
+    const lookup = usingEmail
+      ? { sql: 'SELECT id, name, email, username, password_hash, role FROM users WHERE email = $1', value: emailRaw.toLowerCase() }
+      : { sql: 'SELECT id, name, email, username, password_hash, role FROM users WHERE username = $1', value: usernameRaw.toLowerCase() };
+
+    const result = await pool.query(lookup.sql, [lookup.value]);
     const userRow = result.rows[0];
 
     if (!userRow) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    const passwordMatches = await bcrypt.compare(password, userRow.password_hash);
+    const secret = usingEmail ? passwordRaw : pinRaw;
+    const secretMatches = await bcrypt.compare(secret, userRow.password_hash);
 
-    if (!passwordMatches) {
+    if (!secretMatches) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
@@ -117,9 +147,10 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', requireAuth, async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name, email, role FROM users WHERE id = $1', [
-      req.user.id,
-    ]);
+    const result = await pool.query(
+      'SELECT id, name, email, username, role FROM users WHERE id = $1',
+      [req.user.id],
+    );
     const user = result.rows[0];
 
     if (!user) {

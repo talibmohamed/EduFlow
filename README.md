@@ -69,16 +69,19 @@ The Vite app is available at `http://localhost:5173/`.
 
 ## Demo Credentials
 
-All seeded users use:
+Parents and teachers log in with email + password (`Password123!`):
 
-```text
-Password123!
-```
+| Email | Role |
+|---|---|
+| `pierre@eduflow.test` | teacher |
+| `sophie@eduflow.test` | parent |
 
-- Teacher: `pierre@eduflow.test`
-- Parent: `sophie@eduflow.test`
-- Child: `lucas@eduflow.test`
-- Child: `emma@eduflow.test`
+Children log in with username + 4-digit PIN:
+
+| Username | PIN | Role |
+|---|---|---|
+| `lucas` | `2026` | child |
+| `emma`  | `1234` | child |
 
 ## Auth API
 

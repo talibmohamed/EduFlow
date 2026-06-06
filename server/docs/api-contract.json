@@ -1,6 +1,6 @@
 {
-  "version": "0.3.0",
-  "lastUpdated": "2026-06-01",
+  "version": "0.5.0",
+  "lastUpdated": "2026-06-06",
   "baseUrl": "http://localhost:5000",
   "roles": ["child", "parent", "teacher"],
   "endpoints": [
@@ -59,8 +59,10 @@
       "auth": false,
       "allowedRoles": ["public"],
       "requestBody": {
-        "email": "string",
-        "password": "string"
+        "oneOf": [
+          { "email": "string", "password": "string" },
+          { "username": "string", "pin": "string (4 digits)" }
+        ]
       },
       "successStatus": 200,
       "successShape": {
@@ -71,16 +73,17 @@
           "user": {
             "id": "number",
             "name": "string",
-            "email": "string",
+            "email": "string|null",
+            "username": "string|null",
             "role": "string"
           }
         }
       },
       "errors": [
-        {
-          "status": 401,
-          "message": "Invalid credentials"
-        }
+        { "status": 400, "message": "Provide either email+password or username+pin" },
+        { "status": 400, "message": "Provide only one credential pair" },
+        { "status": 400, "message": "PIN must be 4 digits" },
+        { "status": 401, "message": "Invalid credentials" }
       ]
     },
     {
@@ -96,7 +99,8 @@
           "user": {
             "id": "number",
             "name": "string",
-            "email": "string",
+            "email": "string|null",
+            "username": "string|null",
             "role": "string"
           }
         }
@@ -135,6 +139,64 @@
     { "method": "GET", "path": "/api/child/progress", "auth": true, "allowedRoles": ["child"],
       "requestBody": null, "successStatus": 200,
       "successShape": { "success": true, "data": { "completed": "number", "postponed": "number", "message": "string" } },
-      "errors": [] }
+      "errors": [] },
+    {
+      "method": "GET",
+      "path": "/api/parent/children",
+      "auth": true,
+      "allowedRoles": ["parent"],
+      "requestBody": null,
+      "successStatus": 200,
+      "successShape": {
+        "success": true,
+        "data": {
+          "children": [
+            {
+              "id": "number",
+              "name": "string",
+              "username": "string",
+              "age": "number|null",
+              "classLevel": "string|null"
+            }
+          ]
+        }
+      },
+      "errors": []
+    },
+    {
+      "method": "POST",
+      "path": "/api/parent/children",
+      "auth": true,
+      "allowedRoles": ["parent"],
+      "requestBody": {
+        "name": "string (2-120)",
+        "username": "string (3-60, [a-z0-9_-])",
+        "pin": "string (4 digits)",
+        "age": "integer 4-18 (optional)",
+        "class_level": "string (optional, <=40)"
+      },
+      "successStatus": 201,
+      "successShape": {
+        "success": true,
+        "message": "string",
+        "data": {
+          "child": {
+            "id": "number",
+            "name": "string",
+            "username": "string",
+            "age": "number|null",
+            "classLevel": "string|null"
+          }
+        }
+      },
+      "errors": [
+        { "status": 400, "message": "name invalid" },
+        { "status": 400, "message": "username invalid" },
+        { "status": 400, "message": "PIN must be 4 digits" },
+        { "status": 400, "message": "age invalid (must be 4-18)" },
+        { "status": 400, "message": "class_level invalid" },
+        { "status": 409, "message": "Username already taken" }
+      ]
+    }
   ]
 }

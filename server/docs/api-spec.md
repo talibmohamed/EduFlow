@@ -1,4 +1,4 @@
-Last updated: 2026-06-01
+Last updated: 2026-06-06
 
 ## Global Rules
 
@@ -74,15 +74,17 @@ Last updated: 2026-06-01
 
 - Auth: no.
 - Allowed roles: all.
-- Request body:
+- Request body: one of (exclusive):
 
 ```json
-{
-  "email": "string",
-  "password": "string"
-}
+{ "email": "string", "password": "string" }
 ```
 
+```json
+{ "username": "string", "pin": "string (4 digits)" }
+```
+
+- Parents and teachers use email + password. Children use username + 4-digit PIN.
 - Success: `200`.
 
 ```json
@@ -95,13 +97,18 @@ Last updated: 2026-06-01
       "id": 1,
       "name": "Pierre Dubois",
       "email": "pierre@eduflow.test",
+      "username": null,
       "role": "teacher"
     }
   }
 }
 ```
 
+- For a child the response shape is the same with `email: null` and `username: "lucas"`.
 - Common errors:
+  - `400`, `Provide either email+password or username+pin`.
+  - `400`, `Provide only one credential pair`.
+  - `400`, `PIN must be 4 digits`.
   - `401`, `Invalid credentials`.
 
 ### GET /api/auth/me
@@ -119,12 +126,14 @@ Last updated: 2026-06-01
       "id": 1,
       "name": "Pierre Dubois",
       "email": "pierre@eduflow.test",
+      "username": null,
       "role": "teacher"
     }
   }
 }
 ```
 
+- `email` is `null` for child users; `username` is `null` for parent/teacher users.
 - Common errors:
   - `401`, `Authentication required`.
 
@@ -171,3 +180,68 @@ Last updated: 2026-06-01
 
 - Auth: yes. Allowed roles: `child`.
 - Success: `200`, `{ success, data: { completed, postponed, message } }` (today's counts + positive message).
+
+### GET /api/parent/children
+
+- Auth: yes. Allowed roles: `parent`.
+- Returns the calling parent's children (children with `children_profiles.parent_id = req.user.id`).
+- Success: `200`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "children": [
+      {
+        "id": 7,
+        "name": "Lucas Martin",
+        "username": "lucas",
+        "age": 11,
+        "classLevel": "6ème"
+      }
+    ]
+  }
+}
+```
+
+### POST /api/parent/children
+
+- Auth: yes. Allowed roles: `parent`.
+- Creates a child user (`role: child`, `email: null`, `username`, `password_hash = bcrypt(pin)`) and a `children_profiles` row with `parent_id = req.user.id`. Transactional.
+- Request body:
+
+```json
+{
+  "name": "string (2-120)",
+  "username": "string (3-60, [a-z0-9_-])",
+  "pin": "string (4 digits)",
+  "age": "integer 4-18 (optional)",
+  "class_level": "string (optional, <=40)"
+}
+```
+
+- Success: `201`.
+
+```json
+{
+  "success": true,
+  "message": "Child created",
+  "data": {
+    "child": {
+      "id": 12,
+      "name": "Léa Martin",
+      "username": "lea",
+      "age": 9,
+      "classLevel": "CE2"
+    }
+  }
+}
+```
+
+- Common errors:
+  - `400`, `name invalid`.
+  - `400`, `username invalid`.
+  - `400`, `PIN must be 4 digits`.
+  - `400`, `age invalid (must be 4-18)`.
+  - `400`, `class_level invalid`.
+  - `409`, `Username already taken`.

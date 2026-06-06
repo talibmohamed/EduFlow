@@ -9,8 +9,9 @@ const dashboardByRole = {
   teacher: '/teacher/dashboard',
 };
 
+// V2.3: only parents and teachers can self-register. Children are created
+// by their parent from /parent/dashboard and log in via /child-login.
 const roles = [
-  { key: 'child', label: 'Enfant' },
   { key: 'parent', label: 'Parent' },
   { key: 'teacher', label: 'Enseignant' },
 ];
@@ -22,7 +23,7 @@ export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState(new Set(['child'])); 
+  const [role, setRole] = useState(new Set(['parent']));
   
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

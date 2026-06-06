@@ -4,7 +4,9 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,jsx}",
-    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
+    // HeroUI 2.x packages are split — scan all @heroui/* dist folders
+    // so Modal/Popover/Drawer slot classes are picked up.
+    "./node_modules/@heroui/**/dist/**/*.{js,ts,jsx,tsx,mjs}",
   ],
   theme: {
     extend: {

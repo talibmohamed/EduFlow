@@ -44,6 +44,14 @@ export function AuthProvider({ children }) {
     return loggedInUser;
   }
 
+  async function loginAsChild(username, pin) {
+    const response = await api.post('/api/auth/login', { username, pin });
+    const { token, user: loggedInUser } = response.data.data;
+    localStorage.setItem('eduflow_token', token);
+    setUser(loggedInUser);
+    return loggedInUser;
+  }
+
   async function register(name, email, password, role) {
     const response = await api.post('/api/auth/register', { name, email, password, role });
     const { token, user: registeredUser } = response.data.data;
@@ -58,7 +66,7 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
+    () => ({ user, loading, login, loginAsChild, register, logout }),
     [user, loading],
   );
 

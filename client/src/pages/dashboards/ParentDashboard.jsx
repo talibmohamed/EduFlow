@@ -1,131 +1,297 @@
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from '@heroui/react';
 import Header from '../../components/Header';
+import { EmptyState } from '../../components/ui';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../lib/api';
+
+// Suggest a username from a first name: strip accents, lowercase, keep [a-z0-9-_].
+function suggestUsername(name) {
+  const first = (name || '').trim().split(/\s+/)[0] || '';
+  return first
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9_-]/g, '');
+}
+
+function ChildAvatar({ name }) {
+  const initial = (name || '?').trim().charAt(0).toUpperCase();
+  return (
+    <div
+      className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-border/40 bg-white/70 font-display text-xl text-ink shadow-sm"
+      aria-hidden
+    >
+      {initial}
+    </div>
+  );
+}
+
+function ChildCard({ child }) {
+  const meta = [
+    child.age ? `${child.age} ans` : null,
+    child.classLevel ? child.classLevel : null,
+  ].filter(Boolean).join(' · ');
+
+  return (
+    <div className="paper-card flex items-center gap-5 p-6">
+      <ChildAvatar name={child.name} />
+      <div className="min-w-0 flex-1">
+        <div className="font-display text-[19px] text-ink">{child.name}</div>
+        {meta && (
+          <div className="mt-1 text-sm text-muted-foreground">{meta}</div>
+        )}
+        <div className="mt-2 text-xs text-muted-foreground">
+          Identifiant : <span className="font-medium text-ink/80">{child.username}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddChildModal({ isOpen, onClose, onCreated }) {
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameTouched, setUsernameTouched] = useState(false);
+  const [pin, setPin] = useState('');
+  const [age, setAge] = useState('');
+  const [classLevel, setClassLevel] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  // Auto-suggest username from the first name until the parent edits it manually.
+  function handleNameChange(value) {
+    setName(value);
+    if (!usernameTouched) {
+      setUsername(suggestUsername(value));
+    }
+  }
+
+  function handleUsernameChange(value) {
+    setUsernameTouched(true);
+    setUsername(value.toLowerCase());
+  }
+
+  function handlePinChange(value) {
+    // numeric only, max 4
+    const digits = value.replace(/\D/g, '').slice(0, 4);
+    setPin(digits);
+  }
+
+  function reset() {
+    setName('');
+    setUsername('');
+    setUsernameTouched(false);
+    setPin('');
+    setAge('');
+    setClassLevel('');
+    setError('');
+    setSubmitting(false);
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (submitting) return;
+    setError('');
+    setSubmitting(true);
+    try {
+      const res = await api.post('/api/parent/children', {
+        name,
+        username,
+        pin,
+        age: age === '' ? null : Number(age),
+        class_level: classLevel === '' ? null : classLevel,
+      });
+      const created = res.data.data.child;
+      reset();
+      onCreated(created);
+      onClose();
+    } catch (err) {
+      const message = err.response?.data?.message || "Une erreur est survenue, réessaie.";
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function handleClose() {
+    if (submitting) return;
+    reset();
+    onClose();
+  }
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} placement="center" size="lg" backdrop="blur">
+      <ModalContent>
+        <ModalHeader className="flex flex-col gap-1">
+          <span className="font-display text-2xl text-ink">Ajouter un enfant</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            Choisis un identifiant et un code à 4 chiffres que ton enfant utilisera pour se connecter.
+          </span>
+        </ModalHeader>
+        <ModalBody className="gap-5">
+          <form id="add-child-form" className="flex flex-col gap-5" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-xl border border-border/60 bg-clay/40 p-3 text-sm font-medium text-ink">
+                {error}
+              </div>
+            )}
+            <Input
+              isRequired
+              label="Prénom"
+              placeholder="Léa"
+              value={name}
+              onValueChange={handleNameChange}
+              variant="bordered"
+              radius="lg"
+            />
+            <Input
+              isRequired
+              label="Identifiant"
+              description="Lettres, chiffres, tirets uniquement. 3 à 60 caractères."
+              placeholder="lea"
+              value={username}
+              onValueChange={handleUsernameChange}
+              variant="bordered"
+              radius="lg"
+            />
+            <Input
+              isRequired
+              label="Code à 4 chiffres"
+              description="Partage-le avec ton enfant pour qu'il puisse se connecter."
+              placeholder="0000"
+              value={pin}
+              onValueChange={handlePinChange}
+              variant="bordered"
+              radius="lg"
+              inputMode="numeric"
+              maxLength={4}
+            />
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <Input
+                label="Âge"
+                placeholder="11"
+                value={age}
+                onValueChange={setAge}
+                type="number"
+                min={4}
+                max={18}
+                variant="bordered"
+                radius="lg"
+              />
+              <Input
+                label="Classe"
+                placeholder="6ème"
+                value={classLevel}
+                onValueChange={setClassLevel}
+                variant="bordered"
+                radius="lg"
+              />
+            </div>
+          </form>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="light" onPress={handleClose} isDisabled={submitting}>
+            Annuler
+          </Button>
+          <Button color="primary" type="submit" form="add-child-form" isLoading={submitting}>
+            Ajouter
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}
 
 export default function ParentDashboard() {
   const { user } = useAuth();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [children, setChildren] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // --- FAUSSES DONNÉES (Mocks) POUR L'EXEMPLE ---
-  const childName = "Emma";
-  
-  // Historique de la semaine
-  const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
-  const weeklyMoods = ['😴', '🙂', '⚡', '🙂', '—']; // "—" car on est jeudi/vendredi et ce n'est pas encore rempli
-  
-  // Tâches du jour (simule ce qu'Emma a coché dans son espace)
-  const tasks = [
-    { id: 1, title: 'Lire une courte page de français', done: true },
-    { id: 2, title: 'Trois petits calculs mathématiques', done: true },
-    { id: 3, title: 'Relire la leçon de sciences', done: true },
-    { id: 4, title: 'Écrire un poème de 4 lignes', done: true },
-    { id: 5, title: 'Compléter la frise historique', done: false },
-  ];
+  const fetchChildren = useCallback(async () => {
+    try {
+      const res = await api.get('/api/parent/children');
+      setChildren(res.data.data.children);
+      setError(null);
+    } catch {
+      setError("Impossible de charger la liste des enfants. Réessaie dans un instant.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const completedTasks = tasks.filter(t => t.done).length;
-  const progressPercentage = Math.round((completedTasks / tasks.length) * 100);
+  useEffect(() => {
+    fetchChildren();
+  }, [fetchChildren]);
+
+  function handleCreated(newChild) {
+    setChildren((prev) => [...prev, newChild].sort((a, b) => a.name.localeCompare(b.name)));
+  }
 
   return (
-    <div className="flex min-h-screen flex-col selection:bg-[var(--sky)] selection:text-white" style={{ background: 'var(--linen)' }}>
+    <div
+      className="flex min-h-screen flex-col selection:bg-[var(--sky)] selection:text-white"
+      style={{ background: 'var(--linen)' }}
+    >
       <Header />
-      
+
       <main className="mx-auto w-full max-w-5xl flex-1 p-6 lg:p-10 space-y-8">
-        
-        {/* En-tête du tableau de bord */}
-        <div className="mb-10 animate-rise">
-          <h1 className="font-display text-3xl sm:text-4xl text-ink leading-tight">
-            Le suivi de <em className="not-italic" style={{ color: 'var(--meadow)' }}>{childName}</em>
-          </h1>
-          <p className="mt-2 text-[15px] text-muted-foreground">
-            Suis le rythme de {childName} et l'évolution de ses devoirs d'un simple coup d'œil.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          
-          {/* --- CARTE 1 : État de l'enfant --- */}
-          <div className="paper-card p-6 sm:p-8 animate-rise" style={{ animationDelay: '100ms' }}>
-            <h3 className="mb-6 font-display text-2xl text-ink flex items-center gap-3">
-              <span aria-hidden className="text-[1.2em]">🙂</span>
-              L'énergie de {childName}
-            </h3>
-            
-            <div className="space-y-6">
-              {/* Humeur du jour */}
-              <div className="rounded-xl border border-border/40 bg-white/60 p-5 flex items-center gap-4">
-                <div className="text-4xl">🙂</div>
-                <div>
-                  <div className="font-medium text-ink">En forme aujourd'hui</div>
-                  <div className="text-sm text-muted-foreground">Rythme de travail : 3 à 5 missions recommandées.</div>
-                </div>
-              </div>
-
-              {/* Historique de la semaine */}
-              <div>
-                <h4 className="text-sm font-medium text-ink/70 mb-3">Historique de la semaine</h4>
-                <div className="flex justify-between items-center rounded-xl border border-border/40 bg-white/40 p-4">
-                  {days.map((day, index) => (
-                    <div key={day} className="flex flex-col items-center gap-2">
-                      <span className="text-xs font-medium text-muted-foreground uppercase">{day}</span>
-                      <span className="text-2xl">{weeklyMoods[index]}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center animate-rise">
+          <div>
+            <h1 className="font-display text-3xl sm:text-4xl text-ink leading-tight">
+              Mes enfants
+            </h1>
+            <p className="mt-2 text-[15px] text-muted-foreground">
+              Bonjour {user.name}. Ajoute un enfant pour suivre son rythme au quotidien.
+            </p>
           </div>
-
-          {/* --- CARTE 2 : Progression des devoirs --- */}
-          <div className="paper-card p-6 sm:p-8 animate-rise" style={{ animationDelay: '200ms' }}>
-            <div className="flex justify-between items-end mb-6">
-              <h3 className="font-display text-2xl text-ink flex items-center gap-3">
-                <span aria-hidden className="text-[1.2em]">📝</span>
-                Progression du jour
-              </h3>
-              <span className="text-sm font-medium text-muted-foreground">
-                {completedTasks} / {tasks.length} terminées
-              </span>
-            </div>
-
-            <div className="space-y-6">
-              {/* Barre de progression */}
-              <div className="h-3 w-full rounded-full bg-white border border-border/40 overflow-hidden shadow-inner">
-                <div 
-                  className="h-full rounded-full transition-all duration-1000 ease-out"
-                  style={{ 
-                    width: `${progressPercentage}%`,
-                    background: 'var(--meadow)'
-                  }}
-                />
-              </div>
-
-              {/* Liste des tâches */}
-              <ul className="space-y-3 pt-2">
-                {tasks.map((task) => (
-                  <li key={task.id} className="flex items-start gap-3">
-                    <div 
-                      className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                        task.done 
-                          ? 'bg-[var(--meadow)] border-[var(--meadow)]' 
-                          : 'border-border bg-white/50'
-                      }`}
-                    >
-                      {task.done && (
-                        <svg className="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className={`text-[14px] ${task.done ? 'line-through text-ink/40' : 'font-medium text-ink/80'}`}>
-                      {task.title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          
+          <Button color="primary" onPress={onOpen} className="flex-shrink-0">
+            + Ajouter un enfant
+          </Button>
         </div>
-        
+
+        {error && (
+          <div className="paper-card p-4 text-center text-[15px] font-medium text-ink" role="alert">
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="paper-card p-10 text-center text-[15px] font-medium text-muted-foreground animate-pulse">
+            Chargement de tes enfants...
+          </div>
+        ) : children.length === 0 ? (
+          <EmptyState
+            emoji="🌿"
+            title="Aucun enfant pour le moment"
+            description="Ajoute ton premier enfant pour commencer à suivre son rythme."
+            action={
+              <Button color="primary" onPress={onOpen}>
+                + Ajouter un enfant
+              </Button>
+            }
+          />
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 animate-rise" style={{ animationDelay: '100ms' }}>
+            {children.map((child) => (
+              <ChildCard key={child.id} child={child} />
+            ))}
+          </div>
+        )}
       </main>
+
+      <AddChildModal isOpen={isOpen} onClose={onClose} onCreated={handleCreated} />
     </div>
   );
 }
