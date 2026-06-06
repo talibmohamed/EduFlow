@@ -449,7 +449,7 @@ export function FinalCTA() {
         </h2>
         <div className="mt-14">
           <Link
-            to="/register"
+            to="/auth?mode=register"
             className="btn-paper inline-flex !px-12 !py-5 text-base"
             style={{ background: 'var(--linen)', color: 'var(--ink)' }}
           >

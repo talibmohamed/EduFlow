@@ -22,10 +22,10 @@ export function Nav() {
           EduFlow
         </a>
         <nav className="flex items-center gap-2 sm:gap-3">
-          <Link to="/login" className="hidden sm:inline-flex btn-paper btn-ghost !py-2 !px-4 text-sm">
+          <Link to="/auth" className="hidden sm:inline-flex btn-paper btn-ghost !py-2 !px-4 text-sm">
             Log in
           </Link>
-          <Link to="/register" className="btn-paper btn-primary !py-2.5 !px-5 text-sm">
+          <Link to="/auth?mode=register" className="btn-paper btn-primary !py-2.5 !px-5 text-sm">
             Get started
           </Link>
         </nav>

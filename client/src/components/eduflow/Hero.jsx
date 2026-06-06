@@ -148,7 +148,7 @@ export function Hero() {
         </div>
 
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link to="/register" className="btn-paper btn-primary">
+          <Link to="/auth?mode=register" className="btn-paper btn-primary">
             Start your morning
           </Link>
           <a href="#how" className="btn-paper btn-ghost">
