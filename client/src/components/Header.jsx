@@ -29,7 +29,7 @@ export default function Header() {
 
   function handleLogout() {
     logout();
-    navigate('/login');
+    navigate('/auth');
   }
 
   if (!user) {

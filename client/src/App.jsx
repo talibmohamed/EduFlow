@@ -2,13 +2,11 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import Forbidden from './pages/Forbidden';
 import Landing from './pages/Landing';
-import Login from './pages/Login';
-import ChildLogin from './pages/ChildLogin';
-import Register from './pages/Register';
+import Auth from './pages/Auth';
 import ChildDashboard from './pages/dashboards/ChildDashboard';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
 import TeacherDashboard from './pages/dashboards/TeacherDashboard';
-import CreateHomework from './pages/teacher/CreateHomework'; 
+import CreateHomework from './pages/teacher/CreateHomework';
 import UiKit from './pages/UiKit';
 
 export default function App() {
@@ -16,11 +14,15 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/child-login" element={<ChildLogin />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/auth" element={<Auth />} />
+
+        {/* Backwards-compatible aliases for the previous routes */}
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/register" element={<Navigate to="/auth?mode=register" replace />} />
+        <Route path="/child-login" element={<Navigate to="/auth?role=child" replace />} />
+
         <Route path="/403" element={<Forbidden />} />
-        
+
         <Route
           path="/child/dashboard"
           element={
@@ -29,7 +31,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/parent/dashboard"
           element={
@@ -38,7 +40,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/teacher/dashboard"
           element={
@@ -48,7 +50,6 @@ export default function App() {
           }
         />
 
-        
         <Route
           path="/teacher/homework/create"
           element={
