@@ -41,7 +41,7 @@ export default function ChildDetail() {
           (c) => String(c.id) === String(id),
         );
         if (!found) {
-          setError('Enfant introuvable.');
+          setError("On n'a pas trouvé cet enfant. Retourne au tableau de bord.");
           return;
         }
         setChild(found);
@@ -71,7 +71,7 @@ export default function ChildDetail() {
         <Header />
         <main className="mx-auto w-full max-w-4xl flex-1 p-6 lg:p-10">
           <div className="paper-card p-10 text-center text-[15px] font-medium text-muted-foreground animate-pulse">
-            Chargement...
+            On prépare le suivi de ton enfant...
           </div>
         </main>
       </div>
