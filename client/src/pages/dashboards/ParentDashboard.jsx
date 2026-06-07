@@ -13,8 +13,9 @@ import Header from '../../components/Header';
 import { EmptyState } from '../../components/ui';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../lib/api';
+import { Link } from 'react-router-dom';
 
-// Suggest a username from a first name: strip accents, lowercase, keep [a-z0-9-_].
+
 function suggestUsername(name) {
   const first = (name || '').trim().split(/\s+/)[0] || '';
   return first
@@ -37,25 +38,28 @@ function ChildAvatar({ name }) {
 }
 
 function ChildCard({ child }) {
-  const meta = [
-    child.age ? `${child.age} ans` : null,
-    child.classLevel ? child.classLevel : null,
-  ].filter(Boolean).join(' · ');
+ const meta = [
+     child.age ? `${child.age} ans` : null,
+     child.classLevel ? child.classLevel : null,
+   ].filter(Boolean).join(' · ');
 
-  return (
-    <div className="paper-card flex items-center gap-5 p-6">
-      <ChildAvatar name={child.name} />
-      <div className="min-w-0 flex-1">
-        <div className="font-display text-[19px] text-ink">{child.name}</div>
-        {meta && (
-          <div className="mt-1 text-sm text-muted-foreground">{meta}</div>
-        )}
-        <div className="mt-2 text-xs text-muted-foreground">
-          Identifiant : <span className="font-medium text-ink/80">{child.username}</span>
-        </div>
-      </div>
-    </div>
-  );
+   return (
+     <Link to={`/parent/child/${child.id}`} className="block hover:opacity-90 transition-opacity">
+       <div className="paper-card flex items-center gap-5 p-6">
+         <ChildAvatar name={child.name} />
+         <div className="min-w-0 flex-1">
+           <div className="font-display text-[19px] text-ink">{child.name}</div>
+           {meta && (
+             <div className="mt-1 text-sm text-muted-foreground">{meta}</div>
+           )}
+           <div className="mt-2 text-xs text-muted-foreground">
+             Identifiant : <span className="font-medium text-ink/80">{child.username}</span>
+           </div>
+         </div>
+         <span className="text-muted-foreground text-lg">›</span>
+       </div>
+     </Link>
+   );
 }
 
 function AddChildModal({ isOpen, onClose, onCreated }) {
@@ -68,7 +72,7 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Auto-suggest username from the first name until the parent edits it manually.
+
   function handleNameChange(value) {
     setName(value);
     if (!usernameTouched) {
@@ -82,7 +86,7 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
   }
 
   function handlePinChange(value) {
-    // numeric only, max 4
+
     const digits = value.replace(/\D/g, '').slice(0, 4);
     setPin(digits);
   }

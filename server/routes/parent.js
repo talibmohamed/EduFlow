@@ -135,4 +135,90 @@ router.post('/children', async (req, res) => {
   }
 });
 
+
+router.get('/children/:id/daily-states', async (req, res) => {
+  const childId = Number(req.params.id);
+
+  try {
+
+    const check = await pool.query(
+      `SELECT cp.user_id FROM children_profiles cp
+       WHERE cp.user_id = $1 AND cp.parent_id = $2`,
+      [childId, req.user.id],
+    );
+    if (check.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Child not found' });
+    }
+
+    const result = await pool.query(
+      `SELECT id, date, energy_level, focus_level, created_at
+       FROM daily_states
+       WHERE child_id = $1
+       ORDER BY date DESC
+       LIMIT 30`,
+      [childId],
+    );
+    return res.status(200).json({
+      success: true,
+      data: { dailyStates: result.rows },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
+router.get('/children/:id/progress', async (req, res) => {
+  const childId = Number(req.params.id);
+
+  try {
+
+    const check = await pool.query(
+      `SELECT cp.user_id FROM children_profiles cp
+       WHERE cp.user_id = $1 AND cp.parent_id = $2`,
+      [childId, req.user.id],
+    );
+    if (check.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Child not found' });
+    }
+
+
+    const today = new Date().toISOString().slice(0, 10);
+    const todayResult = await pool.query(
+      `SELECT tp.status, COUNT(*) as count
+       FROM task_progress tp
+       WHERE tp.child_id = $1 AND tp.date = $2
+       GROUP BY tp.status`,
+      [childId, today],
+    );
+    const todayMap = { completed: 0, postponed: 0 };
+    for (const row of todayResult.rows) {
+      todayMap[row.status] = Number(row.count);
+    }
+
+
+    const weekResult = await pool.query(
+      `SELECT tp.date, tp.status, COUNT(*) as count
+       FROM task_progress tp
+       WHERE tp.child_id = $1
+         AND tp.date >= CURRENT_DATE - INTERVAL '6 days'
+       GROUP BY tp.date, tp.status
+       ORDER BY tp.date DESC`,
+      [childId],
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        today: todayMap,
+        week: weekResult.rows,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 export default router;
