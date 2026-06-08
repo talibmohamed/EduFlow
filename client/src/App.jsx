@@ -8,6 +8,8 @@ import ParentDashboard from './pages/dashboards/ParentDashboard';
 import TeacherDashboard from './pages/dashboards/TeacherDashboard';
 import CreateHomework from './pages/teacher/CreateHomework';
 import UiKit from './pages/UiKit';
+import ChildDetail from './pages/parent/ChildDetail';
+
 
 export default function App() {
   return (
@@ -40,6 +42,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+            path="/parent/child/:id"
+            element={
+              <ProtectedRoute allowedRoles={['parent']}>
+                <ChildDetail />
+              </ProtectedRoute>
+            }
+          />
 
         <Route
           path="/teacher/dashboard"

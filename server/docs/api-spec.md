@@ -245,3 +245,57 @@ Last updated: 2026-06-06
   - `400`, `age invalid (must be 4-18)`.
   - `400`, `class_level invalid`.
   - `409`, `Username already taken`.
+
+### GET /api/parent/children/:id/daily-states
+
+- Auth: yes. Allowed roles: `parent`.
+- Returns the daily states of a child belonging to the calling parent (last 30 days, most recent first).
+- Path param: `id` — child user ID.
+- Success: `200`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "dailyStates": [
+      {
+        "id": 1,
+        "date": "2026-06-08",
+        "energy_level": "high",
+        "focus_level": "medium"
+      }
+    ]
+  }
+}
+```
+
+- Common errors:
+  - `403`, `Access denied` (child does not belong to this parent).
+  - `404`, `Child not found`.
+
+### GET /api/parent/children/:id/progress
+
+- Auth: yes. Allowed roles: `parent`.
+- Returns today's and this week's task completion stats for a child belonging to the calling parent.
+- Path param: `id` — child user ID.
+- Success: `200`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "today": {
+      "completed": 2,
+      "postponed": 1
+    },
+    "week": {
+      "completed": 8,
+      "postponed": 3
+    }
+  }
+}
+```
+
+- Common errors:
+  - `403`, `Access denied`.
+  - `404`, `Child not found`.

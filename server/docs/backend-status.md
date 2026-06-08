@@ -1,4 +1,4 @@
-Last updated: 2026-06-06
+Last updated: 2026-06-08
 
 ## Current State
 
@@ -45,6 +45,9 @@ Last updated: 2026-06-06
 
 - `GET /api/parent/children` lists the calling parent's children with their profile (age, class_level, username).
 - `POST /api/parent/children` creates a child (`role: child`, `email: null`, `username`, `password_hash = bcrypt(pin)`) and an auto-linked `children_profiles` row in one transaction. Returns `409` if the username is already taken.
+- `GET /api/parent/children/:id/daily-states` returns the last 30 days of energy/focus history for a child. Verifies the child belongs to the calling parent.
+- `GET /api/parent/children/:id/progress` returns today's and this week's completed/postponed task counts for a child.
+
 
 ## Pending Features
 
@@ -52,7 +55,6 @@ Last updated: 2026-06-06
 - Homework CRUD.
 - Adaptation algorithm.
 - Child task complete and postpone actions.
-- Parent dashboard data (energy history, weekly progress).
 - Teacher reports.
 - Weekly count.
 

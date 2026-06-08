@@ -158,3 +158,21 @@ curl -X POST http://localhost:5000/api/parent/children \
 The child is auto-linked to the calling parent via `children_profiles.parent_id`. The username is lowercased and validated against `^[a-z0-9_-]{3,60}$`. The PIN is stored as a bcrypt hash in `password_hash` (same column reused). The child can then log in via `POST /api/auth/login` with `{username, pin}`.
 
 Duplicate usernames return `409 Username already taken`.
+
+### Get a child's energy/focus history
+
+```bash
+curl http://localhost:5000/api/parent/children/7/daily-states \
+  -H "Authorization: Bearer <parent-jwt>"
+```
+
+Returns the last 30 days of `energy_level` and `focus_level` entries, most recent first. Used by `ChildDetail` to render the Recharts trend chart.
+
+### Get a child's progress stats
+
+```bash
+curl http://localhost:5000/api/parent/children/7/progress \
+  -H "Authorization: Bearer <parent-jwt>"
+```
+
+Returns `today.completed`, `today.postponed`, `week.completed`, `week.postponed`. Used by `ChildDetail` to render the progress cards.
