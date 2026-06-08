@@ -20,12 +20,19 @@ Implemented:
 - Role middleware for protected backend routes.
 - Frontend login, register, logout, session restore, 403 page, and placeholder role dashboards.
 
+Also implemented:
+
+- Daily state endpoints (child submits energy/focus once per day).
+- Adapted homework endpoint (algorithm selects 1, 3, or all homework based on energy/focus).
+- Task complete and postpone actions.
+- Child progress endpoint (completed/postponed counts + positive message).
+- Parent children list and child creation.
+- Parent child detail: energy/focus history (last 30 days) and task progress stats.
+
 Not implemented yet:
 
-- Daily state endpoints.
-- Homework endpoints.
-- Adaptation algorithm.
-- Parent, teacher, or child feature workflows beyond auth landing dashboards.
+- Teacher homework creation and reports.
+- Weekly summary for teacher.
 
 ## Requirements
 
@@ -83,11 +90,17 @@ Children log in with username + 4-digit PIN:
 | `lucas` | `2026` | child |
 | `emma`  | `1234` | child |
 
-## Auth API
+## API Routes
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/auth/me`
+Full details in `server/docs/api-spec.md`.
+
+**Auth** — `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
+
+**Child** — `POST /api/daily-state`, `GET /api/daily-state/me`, `GET /api/child/adapted-homework`, `GET /api/child/homework/:id`, `PATCH /api/tasks/:id/complete`, `PATCH /api/tasks/:id/postpone`, `GET /api/child/progress`
+
+**Parent** — `GET /api/parent/children`, `POST /api/parent/children`, `GET /api/parent/children/:id/daily-states`, `GET /api/parent/children/:id/progress`
+
+**Teacher** — _in progress_
 
 Authenticated requests use:
 
