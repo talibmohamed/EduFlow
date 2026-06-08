@@ -197,6 +197,55 @@
         { "status": 400, "message": "class_level invalid" },
         { "status": 409, "message": "Username already taken" }
       ]
+    },{
+      "method": "GET",
+      "path": "/api/parent/children/:id/daily-states",
+      "auth": true,
+      "allowedRoles": ["parent"],
+      "requestBody": null,
+      "successStatus": 200,
+      "successShape": {
+        "success": true,
+        "data": {
+          "dailyStates": [
+            {
+              "id": "number",
+              "date": "string (YYYY-MM-DD)",
+              "energy_level": "low|medium|high",
+              "focus_level": "low|medium|high"
+            }
+          ]
+        }
+      },
+      "errors": [
+        { "status": 403, "message": "Access denied" },
+        { "status": 404, "message": "Child not found" }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/parent/children/:id/progress",
+      "auth": true,
+      "allowedRoles": ["parent"],
+      "requestBody": null,
+      "successStatus": 200,
+      "successShape": {
+        "success": true,
+        "data": {
+          "today": {
+            "completed": "number",
+            "postponed": "number"
+          },
+          "week": {
+            "completed": "number",
+            "postponed": "number"
+          }
+        }
+      },
+      "errors": [
+        { "status": 403, "message": "Access denied" },
+        { "status": 404, "message": "Child not found" }
+      ]
     }
   ]
 }
