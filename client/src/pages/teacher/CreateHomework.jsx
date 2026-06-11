@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../lib/api';
 
 export default function CreateHomework() {
   const navigate = useNavigate();
-  
-  // Simule la liste des élèves assignés (à remplacer par l'API)
-  const myStudents = [
-    { id: 1, name: 'Léo Martin' },
-    { id: 2, name: 'Emma Dubois' },
-    { id: 3, name: 'Hugo Leroy' },
-  ];
+  const [myStudents, setMyStudents] = useState([]);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    api.get('/api/teacher/children').then((res) => {
+      setMyStudents(res.data.data.children);
+    });
+  }, []);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -26,20 +29,34 @@ export default function CreateHomework() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Devoir à envoyer au backend :', formData);
-    // Ici on appellera : fetch('/api/teacher/homework', { method: 'POST', body: JSON.stringify(formData) })
-    alert("Le devoir a été créé avec succès ! Ses sous-tâches seront générées automatiquement.");
-    navigate('/teacher/dashboard');
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      await api.post('/api/teacher/homework', {
+        childId: Number(formData.childId),
+        title: formData.title,
+        description: formData.description,
+        subject: formData.subject,
+        dueDate: formData.dueDate,
+        estimatedMinutes: Number(formData.estimatedMinutes),
+        difficulty: formData.difficulty,
+        priority: Number(formData.priority),
+      });
+      navigate('/teacher/dashboard');
+    } catch (err) {
+      setSubmitError(err.response?.data?.message || 'Une erreur est survenue.');
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen font-sans selection:bg-[var(--sky)] selection:text-white" style={{ background: 'var(--linen)' }}>
-      
+
       {/* Bouton de retour en haut à gauche pour l'ergonomie */}
       <div className="max-w-4xl mx-auto px-6 pt-10 pb-6">
-        <button 
+        <button
           onClick={() => navigate('/teacher/dashboard')}
           className="text-sm font-medium text-muted-foreground hover:text-ink transition-colors flex items-center gap-2"
         >
@@ -48,7 +65,7 @@ export default function CreateHomework() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 pb-20">
-        
+
         {/* Titre de la page */}
         <div className="mb-10 animate-rise">
           <h1 className="font-display text-4xl sm:text-5xl text-ink leading-[1.1]">
@@ -61,7 +78,7 @@ export default function CreateHomework() {
 
         <div className="paper-card animate-rise" style={{ animationDelay: '100ms' }}>
           <form onSubmit={handleSubmit} className="p-8 sm:p-10 space-y-8">
-            
+
             {/* Ligne 1 : Titre et Élève */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="flex flex-col gap-2.5">
@@ -181,6 +198,12 @@ export default function CreateHomework() {
               ></textarea>
             </div>
 
+            {submitError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {submitError}
+              </div>
+            )}
+
             {/* Boutons d'action */}
             <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-border/40">
               <button
@@ -192,12 +215,13 @@ export default function CreateHomework() {
               </button>
               <button
                 type="submit"
-                className="btn-paper btn-primary w-full sm:w-auto"
+                disabled={submitting}
+                className="btn-paper btn-primary w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Créer le devoir
+                {submitting ? 'Création en cours…' : 'Créer le devoir'}
               </button>
             </div>
-            
+
           </form>
         </div>
       </div>
