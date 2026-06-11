@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Header from '../../components/Header';
+import { EmptyState, HomeworkCard } from '../../components/ui';
 import api from '../../lib/api';
-
-const DIFFICULTY_LABEL = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
-const DIFFICULTY_COLOR = { easy: 'var(--meadow)', medium: 'var(--sky)', hard: '#f87171' };
 
 function CountCard({ label, value, color }) {
   return (
@@ -67,7 +65,7 @@ export default function TeacherReports() {
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-border bg-clay p-4 text-sm text-ink">
             {error}
           </div>
         )}
@@ -88,7 +86,7 @@ export default function TeacherReports() {
               <CountCard
                 label="Tâches reportées"
                 value={data.totals.postponed}
-                color="#f87171"
+                color="var(--ink)"
               />
             </div>
 
@@ -105,7 +103,7 @@ export default function TeacherReports() {
                         <span className="text-muted-foreground">{day.date}</span>
                         <div className="flex gap-4">
                           <span className="text-green-600 font-medium">{day.completed} complétée{day.completed !== 1 ? 's' : ''}</span>
-                          <span className="text-red-400 font-medium">{day.postponed} reportée{day.postponed !== 1 ? 's' : ''}</span>
+                          <span className="text-ink/60 font-medium">{day.postponed} reportée{day.postponed !== 1 ? 's' : ''}</span>
                         </div>
                       </div>
                     ))}
@@ -122,30 +120,25 @@ export default function TeacherReports() {
 
               <div className="p-6 sm:p-8">
                 {data.homework.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">Aucun devoir assigné pour le moment.</p>
+                  <EmptyState
+                    emoji="🌿"
+                    title="Aucun devoir assigné"
+                    description="Les devoirs créés pour cet élève apparaîtront ici."
+                  />
                 ) : (
-                  <div className="divide-y divide-border/30">
+                  <div className="grid gap-5 sm:grid-cols-2">
                     {data.homework.map((hw) => {
                       const pct = hw.totalTasks > 0 ? Math.round((hw.completedTasks / hw.totalTasks) * 100) : 0;
                       const done = hw.completedTasks === hw.totalTasks && hw.totalTasks > 0;
                       return (
-                        <div key={hw.id} className="py-5 space-y-3">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="font-medium text-ink">{hw.title}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {hw.subject} · dû le {hw.dueDate}
-                              </p>
-                            </div>
-                            <span
-                              className="flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-full text-white"
-                              style={{ background: DIFFICULTY_COLOR[hw.difficulty] }}
-                            >
-                              {DIFFICULTY_LABEL[hw.difficulty]}
-                            </span>
-                          </div>
-
-                          <div className="space-y-1.5">
+                        <div key={hw.id} className="space-y-3">
+                          <HomeworkCard
+                            title={hw.title}
+                            subject={hw.subject}
+                            minutes={hw.estimatedMinutes}
+                            dueLabel={`dû le ${hw.dueDate}`}
+                          />
+                          <div className="space-y-1.5 px-1">
                             <div className="flex justify-between text-xs text-muted-foreground">
                               <span>Progression</span>
                               <span>{hw.completedTasks} / {hw.totalTasks} tâches</span>

@@ -2,10 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import { useAuth } from '../../contexts/AuthContext';
+import { EmptyState, HomeworkCard } from '../../components/ui';
 import api from '../../lib/api';
-
-const DIFFICULTY_LABEL = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
-const DIFFICULTY_COLOR = { easy: 'var(--meadow)', medium: 'var(--sky)', hard: '#f87171' };
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -54,7 +52,7 @@ export default function TeacherDashboard() {
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-border bg-clay p-4 text-sm text-ink">
             {error}
           </div>
         )}
@@ -69,7 +67,11 @@ export default function TeacherDashboard() {
             {loading ? (
               <p className="text-muted-foreground text-sm">Chargement…</p>
             ) : children.length === 0 ? (
-              <p className="text-muted-foreground text-sm">Aucun élève assigné pour le moment.</p>
+              <EmptyState
+                emoji="🌿"
+                title="Aucun élève assigné"
+                description="Tes élèves apparaîtront ici dès qu'ils seront ajoutés à ta classe."
+              />
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {children.map((child) => (
@@ -107,23 +109,24 @@ export default function TeacherDashboard() {
             {loading ? (
               <p className="text-muted-foreground text-sm">Chargement…</p>
             ) : homework.length === 0 ? (
-              <p className="text-muted-foreground text-sm">Aucun devoir créé pour le moment.</p>
+              <EmptyState
+                emoji="✏️"
+                title="Aucun devoir créé"
+                description="Crée ton premier devoir depuis le bouton en haut. Il sera découpé en petites étapes."
+              />
             ) : (
-              <div className="divide-y divide-border/30">
-                {homework.slice(0, 8).map((hw) => (
-                  <div key={hw.id} className="flex items-center justify-between py-4 gap-4">
-                    <div className="min-w-0">
-                      <p className="font-medium text-ink truncate">{hw.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {hw.child.name} · {hw.subject} · dû le {hw.dueDate}
-                      </p>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {homework.slice(0, 6).map((hw) => (
+                  <div key={hw.id} className="space-y-2">
+                    <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                      Pour {hw.child.name}
                     </div>
-                    <span
-                      className="flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-full text-white"
-                      style={{ background: DIFFICULTY_COLOR[hw.difficulty] }}
-                    >
-                      {DIFFICULTY_LABEL[hw.difficulty]}
-                    </span>
+                    <HomeworkCard
+                      title={hw.title}
+                      subject={hw.subject}
+                      minutes={hw.estimatedMinutes}
+                      dueLabel={`dû le ${hw.dueDate}`}
+                    />
                   </div>
                 ))}
               </div>

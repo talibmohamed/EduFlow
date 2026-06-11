@@ -198,7 +198,7 @@ router.get('/reports/:childId', async (req, res) => {
     const homeworkResult = await pool.query(
       `SELECT h.id, h.title, h.subject,
               to_char(h.due_date, 'YYYY-MM-DD') AS due_date,
-              h.difficulty, h.priority,
+              h.estimated_minutes, h.difficulty, h.priority,
               COUNT(t.id) AS total_tasks,
               COUNT(t.id) FILTER (WHERE t.status = 'completed') AS completed_tasks
        FROM homework h
@@ -230,6 +230,7 @@ router.get('/reports/:childId', async (req, res) => {
           title: row.title,
           subject: row.subject,
           dueDate: row.due_date,
+          estimatedMinutes: row.estimated_minutes,
           difficulty: row.difficulty,
           priority: row.priority,
           totalTasks: Number(row.total_tasks),
