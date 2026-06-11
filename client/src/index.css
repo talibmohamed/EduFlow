@@ -307,6 +307,9 @@ body {
   .animate-breath {
     animation: fade-only 300ms ease-out both;
   }
+  .animate-float {
+    animation: none;
+  }
   @keyframes fade-only {
     from {
       opacity: 0;

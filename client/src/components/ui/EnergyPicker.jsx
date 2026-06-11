@@ -50,14 +50,17 @@ export function EnergyPicker({ heading, choices, value, onChange }) {
           />
         </svg>
         <div className="relative flex items-end justify-center gap-4">
-          {choices.map((choice) => {
+          {choices.map((choice, index) => {
             const isSelected = choice.key === selected;
 
             return (
               <div
-                className="transition-transform duration-500"
+                className="animate-float transition-transform duration-500"
                 key={choice.key}
-                style={{ transform: isSelected ? 'translateY(-4px)' : 'translateY(0)' }}
+                style={{
+                  transform: isSelected ? 'translateY(-4px) scale(1.08)' : 'translateY(0)',
+                  animationDelay: `${index * 1200}ms`,
+                }}
               >
                 <EmojiButton
                   emoji={choice.emoji}

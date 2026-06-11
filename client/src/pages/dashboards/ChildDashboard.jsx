@@ -148,12 +148,55 @@ export default function ChildDashboard() {
           </div>
         ) : !dailyState ? (
           /* --- Empty state : le formulaire de l'état du jour --- */
-          <section className="animate-rise">
-            <h2 className="mb-6 font-display text-3xl sm:text-4xl text-ink leading-tight text-center sm:text-left">
-              Comment te sens-tu aujourd'hui, <em className="not-italic" style={{ color: 'var(--sky)' }}>{user.name}</em> ?
-            </h2>
+          <section className="relative">
+            {/* Dawn gradient (matches Hero) */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 -top-16 bottom-0 -z-10"
+              style={{
+                background:
+                  'linear-gradient(180deg, transparent 0%, transparent 40%, oklch(0.93 0.04 240 / 0.35) 100%)',
+              }}
+            />
 
-            <div className="paper-card p-8 sm:p-10 flex flex-col items-center justify-center text-center space-y-10">
+            <h2 className="mb-2 font-display text-4xl sm:text-5xl text-ink leading-[1.05] text-center">
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '0ms' }}>
+                Comment
+              </span>
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '220ms' }}>
+                te
+              </span>
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '440ms' }}>
+                sens-tu
+              </span>
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '660ms' }}>
+                <span className="swash">
+                  aujourd'hui
+                  <svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden>
+                    <path
+                      className="swash-path"
+                      d="M3 9 C 50 3 90 12 140 6 S 196 4 197 7"
+                      fill="none"
+                      stroke="var(--honey)"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      pathLength="1"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                </span>
+                ,
+              </span>
+              <span className="inline-block animate-breath" style={{ animationDelay: '880ms' }}>
+                <em className="not-italic" style={{ color: 'var(--sky)' }}>{user.name}</em>
+                {' ?'}
+              </span>
+            </h2>
+            <p className="mb-10 text-center text-sm text-muted-foreground animate-rise" style={{ animationDelay: '1100ms' }}>
+              Touche celle qui te ressemble le plus.
+            </p>
+
+            <div className="paper-card p-8 sm:p-10 flex flex-col items-center justify-center text-center space-y-10 animate-rise" style={{ animationDelay: '1200ms' }}>
               <div>
                 <EnergyPicker
                   heading="Ton énergie"
