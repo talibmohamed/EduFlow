@@ -6,6 +6,7 @@ import dailyStateRouter from './routes/daily-state.js';
 import childRouter from './routes/child.js';
 import tasksRouter from './routes/tasks.js';
 import parentRouter from './routes/parent.js';
+import teacherRouter from './routes/teacher.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/daily-state', dailyStateRouter);
 app.use('/api/child', childRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/parent', parentRouter);
+app.use('/api/teacher', teacherRouter);
 
 app.listen(port, () => {
   console.log(`EduFlow API listening on port ${port}`);
