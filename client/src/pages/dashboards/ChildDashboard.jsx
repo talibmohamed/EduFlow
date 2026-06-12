@@ -341,35 +341,42 @@ export default function ChildDashboard() {
                 Ta progression
               </h2>
               <div className="paper-card p-6 sm:p-8 border-t-4 shadow-sm transition-all duration-500" style={{ borderTopColor: isAllDone ? 'var(--meadow)' : 'var(--clay)' }}>
-                <div className="space-y-6">
-                  {/* Message positif généré par le serveur */}
-                  <div className="text-center text-lg font-medium" style={{ color: isAllDone ? 'var(--meadow)' : 'var(--ink)' }}>
-                    {isAllDone
-                      ? `Bravo ${user.name} ! Tu as terminé toutes tes missions pour aujourd'hui. 🎉`
-                      : progress?.message ?? 'Touche une mission quand tu as terminé pour faire grandir la barre !'}
-                  </div>
-
-                  {/* Barre de progression visuelle */}
-                  {missions.length > 0 && (
-                    <div className="h-3 w-full rounded-full bg-white/60 overflow-hidden shadow-inner">
-                      <div
-                        className="h-full rounded-full transition-all duration-700 ease-out"
-                        style={{
-                          width: `${progressPercentage}%`,
-                          background: 'var(--meadow)',
-                        }}
-                      />
+                {(!progress || (progress.completed === 0 && progress.postponed === 0)) ? (
+                  /* Cahier §4.10.3 — neutral message before any task action */
+                  <EmptyState
+                    emoji="🌱"
+                    title="Ta progression apparaîtra ici"
+                    description="Lorsque tu commenceras une mission, tu verras tout grandir."
+                  />
+                ) : (
+                  <div className="space-y-6">
+                    {/* Message positif généré par le serveur */}
+                    <div className="text-center text-lg font-medium" style={{ color: isAllDone ? 'var(--meadow)' : 'var(--ink)' }}>
+                      {isAllDone
+                        ? `Bravo ${user.name} ! Tu as terminé toutes tes missions pour aujourd'hui. 🎉`
+                        : progress?.message ?? 'Continue à ton rythme.'}
                     </div>
-                  )}
 
-                  {/* Compteurs du jour (depuis l'API) */}
-                  {progress && (progress.completed > 0 || progress.postponed > 0) && (
+                    {/* Barre de progression visuelle */}
+                    {missions.length > 0 && (
+                      <div className="h-3 w-full rounded-full bg-white/60 overflow-hidden shadow-inner">
+                        <div
+                          className="h-full rounded-full transition-all duration-700 ease-out"
+                          style={{
+                            width: `${progressPercentage}%`,
+                            background: 'var(--meadow)',
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Compteurs du jour (depuis l'API) */}
                     <div className="flex items-center justify-center gap-8 text-sm font-medium text-muted-foreground">
                       <span>✅ {progress.completed} terminée{progress.completed > 1 ? 's' : ''}</span>
                       <span>🕊️ {progress.postponed} reportée{progress.postponed > 1 ? 's' : ''}</span>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </section>
           </>
