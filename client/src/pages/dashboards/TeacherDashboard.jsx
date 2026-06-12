@@ -5,6 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { EmptyState, HomeworkCard } from '../../components/ui';
 import api from '../../lib/api';
 
+const DIFFICULTY_LABEL_FR = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
+
 export default function TeacherDashboard() {
   const { user } = useAuth();
   const [children, setChildren] = useState([]);
@@ -126,6 +128,8 @@ export default function TeacherDashboard() {
                       subject={hw.subject}
                       minutes={hw.estimatedMinutes}
                       dueLabel={`dû le ${hw.dueDate}`}
+                      difficulty={hw.difficulty}
+                      difficultyLabel={DIFFICULTY_LABEL_FR[hw.difficulty]}
                     />
                   </div>
                 ))}

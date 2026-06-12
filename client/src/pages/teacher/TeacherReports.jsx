@@ -4,6 +4,8 @@ import Header from '../../components/Header';
 import { EmptyState, HomeworkCard } from '../../components/ui';
 import api from '../../lib/api';
 
+const DIFFICULTY_LABEL_FR = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
+
 function CountCard({ label, value, color }) {
   return (
     <div className="rounded-2xl border border-border/40 bg-white/60 p-6 shadow-sm flex flex-col gap-2">
@@ -137,6 +139,8 @@ export default function TeacherReports() {
                             subject={hw.subject}
                             minutes={hw.estimatedMinutes}
                             dueLabel={`dû le ${hw.dueDate}`}
+                            difficulty={hw.difficulty}
+                            difficultyLabel={DIFFICULTY_LABEL_FR[hw.difficulty]}
                           />
                           <div className="space-y-1.5 px-1">
                             <div className="flex justify-between text-xs text-muted-foreground">
