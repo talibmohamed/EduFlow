@@ -18,6 +18,38 @@ function CountCard({ label, value, color }) {
   );
 }
 
+function CountCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border/40 bg-white/60 p-6 shadow-sm flex flex-col gap-3 animate-pulse">
+      <div className="h-3 w-24 rounded-full bg-clay" />
+      <div className="h-10 w-16 rounded-xl bg-clay" />
+      <div className="h-3 w-20 rounded-full bg-clay" />
+    </div>
+  );
+}
+
+function HomeworkCardSkeleton() {
+  return (
+    <div className="space-y-3">
+      <div className="hw-card animate-pulse">
+        <div className="flex items-center justify-between">
+          <div className="h-5 w-20 rounded-full bg-clay" />
+          <div className="h-3 w-12 rounded-full bg-clay" />
+        </div>
+        <div className="mt-4 h-5 w-3/4 rounded-full bg-clay" />
+        <div className="mt-4 h-3 w-1/2 rounded-full bg-clay" />
+      </div>
+      <div className="px-1 space-y-1.5">
+        <div className="flex justify-between">
+          <div className="h-3 w-20 rounded-full bg-clay animate-pulse" />
+          <div className="h-3 w-16 rounded-full bg-clay animate-pulse" />
+        </div>
+        <div className="h-2 w-full rounded-full bg-clay animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
 export default function TeacherReports() {
   const { childId } = useParams();
   const [data, setData] = useState(null);
@@ -73,7 +105,17 @@ export default function TeacherReports() {
         )}
 
         {loading && !error && (
-          <p className="text-muted-foreground text-sm">Chargement…</p>
+          <>
+            <div className="grid grid-cols-2 gap-6">
+              <CountCardSkeleton />
+              <CountCardSkeleton />
+            </div>
+            <div className="paper-card p-6 sm:p-8">
+              <div className="grid gap-5 sm:grid-cols-2">
+                {[0, 1].map((i) => <HomeworkCardSkeleton key={i} />)}
+              </div>
+            </div>
+          </>
         )}
 
         {data && (
