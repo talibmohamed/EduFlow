@@ -75,7 +75,7 @@ export default function CreateHomework() {
 
         {/* Titre de la page */}
         <div className="mb-10 animate-rise">
-          <h1 className="font-display text-4xl sm:text-5xl text-ink leading-[1.1]">
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl text-ink leading-[1.1]">
             Créer un <em className="not-italic" style={{ color: 'var(--meadow)' }}>nouveau devoir.</em>
           </h1>
           <p className="mt-3 text-[16px] text-muted-foreground max-w-2xl">

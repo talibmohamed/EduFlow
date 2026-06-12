@@ -159,7 +159,7 @@ export default function ChildDashboard() {
               }}
             />
 
-            <h2 className="mb-2 font-display text-4xl sm:text-5xl text-ink leading-[1.05] text-center">
+            <h2 className="mb-2 font-display text-3xl sm:text-4xl lg:text-5xl text-ink leading-[1.05] text-center">
               <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '0ms' }}>
                 Comment
               </span>
