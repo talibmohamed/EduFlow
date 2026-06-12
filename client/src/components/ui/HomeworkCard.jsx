@@ -7,6 +7,14 @@ function formatDue(days, label) {
   return { text: `Due ${label ?? ''}`.trim(), tone: 'muted' };
 }
 
+// Difficulty is displayed but never used by the adaptation algorithm (cahier §4.3.3).
+const DIFFICULTY_FALLBACK_LABEL = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+const DIFFICULTY_BG = {
+  easy: 'var(--meadow)',
+  medium: 'var(--sky)',
+  hard: 'var(--ink)',
+};
+
 export function HomeworkCard({
   title,
   subject,
@@ -16,20 +24,37 @@ export function HomeworkCard({
   dueInDays,
   dueDateLabel,
   stepsLeft,
+  difficulty,
+  difficultyLabel,
   forceHover,
 }) {
   const due = dueLabel
     ? { text: dueLabel, tone: dueTone ?? 'muted' }
     : formatDue(dueInDays, dueDateLabel);
   const bigTask = minutes >= 30;
+  const difficultyText = difficulty
+    ? difficultyLabel ?? DIFFICULTY_FALLBACK_LABEL[difficulty]
+    : null;
 
   return (
     <div className="hw-card group" data-force-hover={forceHover ? '' : undefined}>
-      <div className="flex items-center justify-between">
-        <Chip className="hw-subject" size="sm" variant="flat">
-          {subject}
-        </Chip>
-        <span className="text-[13px] tabular-nums text-muted-foreground">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Chip className="hw-subject flex-shrink-0" size="sm" variant="flat">
+            {subject}
+          </Chip>
+          {difficultyText && (
+            <Chip
+              size="sm"
+              variant="flat"
+              className="flex-shrink-0 text-[11px] font-semibold uppercase tracking-wide"
+              style={{ background: DIFFICULTY_BG[difficulty], color: 'white' }}
+            >
+              {difficultyText}
+            </Chip>
+          )}
+        </div>
+        <span className="text-[13px] tabular-nums text-muted-foreground flex-shrink-0">
           <span className={bigTask ? 'hw-min-big' : ''}>{minutes} min</span>
         </span>
       </div>
