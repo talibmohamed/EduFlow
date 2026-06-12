@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
 
+// DESIGN-SYSTEM §3: shared input styling for the whole form.
+const inputClass =
+  'w-full h-12 px-4 bg-card border border-border rounded-xl text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky transition-colors';
+const selectClass = `${inputClass} cursor-pointer`;
+const textareaClass =
+  'w-full p-4 bg-card border border-border rounded-xl text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky transition-colors resize-y';
+
 export default function CreateHomework() {
   const navigate = useNavigate();
   const [myStudents, setMyStudents] = useState([]);
@@ -90,7 +97,7 @@ export default function CreateHomework() {
                   value={formData.title}
                   onChange={handleChange}
                   placeholder="Ex: Exercices de fractions"
-                  className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink placeholder:text-muted-foreground shadow-sm transition-colors"
+                  className={inputClass}
                 />
               </div>
               <div className="flex flex-col gap-2.5">
@@ -100,7 +107,7 @@ export default function CreateHomework() {
                   required
                   value={formData.childId}
                   onChange={handleChange}
-                  className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink shadow-sm transition-colors cursor-pointer"
+                  className={selectClass}
                 >
                   <option value="" disabled className="text-muted-foreground">Sélectionner un élève...</option>
                   {myStudents.map(student => (
@@ -121,7 +128,7 @@ export default function CreateHomework() {
                   value={formData.subject}
                   onChange={handleChange}
                   placeholder="Ex: Mathématiques"
-                  className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink placeholder:text-muted-foreground shadow-sm transition-colors"
+                  className={inputClass}
                 />
               </div>
               <div className="flex flex-col gap-2.5">
@@ -132,7 +139,7 @@ export default function CreateHomework() {
                   required
                   value={formData.dueDate}
                   onChange={handleChange}
-                  className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink shadow-sm transition-colors cursor-pointer"
+                  className={selectClass}
                 />
               </div>
             </div>
@@ -152,7 +159,7 @@ export default function CreateHomework() {
                     value={formData.estimatedMinutes}
                     onChange={handleChange}
                     placeholder="Ex: 40"
-                    className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink placeholder:text-muted-foreground shadow-sm transition-colors pr-12"
+                    className={`${inputClass} pr-12`}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">min</span>
                 </div>
@@ -163,7 +170,7 @@ export default function CreateHomework() {
                   name="difficulty"
                   value={formData.difficulty}
                   onChange={handleChange}
-                  className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink shadow-sm transition-colors cursor-pointer"
+                  className={selectClass}
                 >
                   <option value="easy">Facile</option>
                   <option value="medium">Moyenne</option>
@@ -176,7 +183,7 @@ export default function CreateHomework() {
                   name="priority"
                   value={formData.priority}
                   onChange={handleChange}
-                  className="w-full h-12 px-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink shadow-sm transition-colors cursor-pointer"
+                  className={selectClass}
                 >
                   <option value="3">Haute (Très urgent)</option>
                   <option value="2">Normale</option>
@@ -194,7 +201,7 @@ export default function CreateHomework() {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Détaille les attentes globales de ce devoir..."
-                className="w-full p-4 bg-white/60 border border-border/40 rounded-xl focus:outline-none focus:border-border text-ink placeholder:text-muted-foreground shadow-sm transition-colors resize-y"
+                className={textareaClass}
               ></textarea>
             </div>
 
