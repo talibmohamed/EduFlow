@@ -14,6 +14,14 @@ const roleLabels = {
   teacher: 'Enseignant',
 };
 
+// Subtle role-specific dot in the pill. Sky for parent (trust),
+// meadow for teacher (positive), warm ink dot for child (calm).
+const roleDot = {
+  child: 'var(--ink)',
+  parent: 'var(--sky)',
+  teacher: 'var(--meadow)',
+};
+
 export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -49,24 +57,29 @@ export default function Header() {
           EduFlow
         </Link>
         
-        <div className="flex items-center gap-4 sm:gap-5">
-          
-          {/* Infos de l'utilisateur (cachées sur très petits écrans) */}
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="text-[15px] font-medium text-ink">{user.name}</span>
-            <span className="rounded-full border border-border/60 bg-clay px-2.5 py-0.5 text-xs font-medium tracking-wide text-ink/75 uppercase">
-              {roleLabels[user.role]}
-            </span>
-          </div>
-          
-          {/* Bouton de déconnexion stylé comme les boutons de l'accueil */}
-          <button 
-            onClick={handleLogout} 
-            className="btn-paper btn-ghost !py-2 !px-4 text-sm"
+        <div className="flex items-center gap-3 sm:gap-5">
+
+          {/* Name hidden on mobile to save room — pill stays always visible */}
+          <span className="hidden text-[15px] font-medium text-ink sm:inline">
+            {user.name}
+          </span>
+
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-clay px-2.5 py-0.5 text-xs font-medium tracking-wide text-ink/75 uppercase">
+            <span
+              aria-hidden
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: roleDot[user.role] }}
+            />
+            {roleLabels[user.role]}
+          </span>
+
+          <button
+            onClick={handleLogout}
+            className="btn-paper btn-ghost text-sm"
           >
             Déconnexion
           </button>
-          
+
         </div>
       </div>
     </header>
