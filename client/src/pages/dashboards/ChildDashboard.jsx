@@ -1,57 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import { useAuth } from '../../contexts/AuthContext';
+import { EmptyState, EnergyPicker } from '../../components/ui';
 import api from '../../lib/api';
 
 // Les 3 niveaux d'énergie (clés alignées sur l'API : low / medium / high)
 const energyLevels = [
-  { key: 'low', glyph: '😴', label: 'Fatigué(e)', note: 'Une journée douce en perspective.' },
-  { key: 'medium', glyph: '🙂', label: 'En forme', note: 'Le rythme parfait pour avancer.' },
-  { key: 'high', glyph: '⚡', label: 'Au top', note: 'Prêt(e) à relever tous les défis !' },
+  { key: 'low', emoji: '😴', label: 'Fatigué(e)', note: 'Une journée douce en perspective.' },
+  { key: 'medium', emoji: '🙂', label: 'En forme', note: 'Le rythme parfait pour avancer.' },
+  { key: 'high', emoji: '⚡', label: 'Au top', note: 'Prêt(e) à relever tous les défis !' },
 ];
 
 // Les 3 niveaux de concentration (l'API attend energy_level ET focus_level)
 const focusLevels = [
-  { key: 'low', glyph: '🎈', label: 'Dans la lune', note: 'On choisit des missions toutes douces.' },
-  { key: 'medium', glyph: '📘', label: 'Concentré(e)', note: 'De quoi bien avancer.' },
-  { key: 'high', glyph: '🚀', label: 'Ultra focus', note: "Rien ne peut t'arrêter !" },
+  { key: 'low', emoji: '🎈', label: 'Dans la lune', note: 'On choisit des missions toutes douces.' },
+  { key: 'medium', emoji: '📘', label: 'Concentré(e)', note: 'De quoi bien avancer.' },
+  { key: 'high', emoji: '🚀', label: 'Ultra focus', note: "Rien ne peut t'arrêter !" },
 ];
-
-// Petit sélecteur d'emojis réutilisé pour l'énergie et la concentration (style d'origine conservé)
-function EmojiLevelPicker({ levels, value, onSelect, groupLabel }) {
-  return (
-    <>
-      <div className="flex items-center justify-center gap-6 sm:gap-12" role="radiogroup" aria-label={groupLabel}>
-        {levels.map((level) => {
-          const isActive = value === level.key;
-          return (
-            <button
-              key={level.key}
-              role="radio"
-              aria-checked={isActive}
-              onClick={() => onSelect(level.key)}
-              className={`relative text-5xl sm:text-6xl transition-all duration-300 ${
-                isActive ? 'scale-125 opacity-100' : 'scale-90 opacity-50 hover:opacity-80 hover:scale-105'
-              }`}
-            >
-              <span aria-hidden>{level.glyph}</span>
-              {isActive && (
-                <span
-                  aria-hidden
-                  className="absolute -inset-4 rounded-full -z-10 animate-rise"
-                  style={{ background: 'radial-gradient(circle, oklch(0.86 0.16 95 / 0.25), transparent 70%)' }}
-                />
-              )}
-            </button>
-          );
-        })}
-      </div>
-      <p className="mt-6 text-[16px] font-medium text-ink/75 transition-all duration-300 min-h-[24px]">
-        {levels.find((l) => l.key === value)?.label ?? 'Choisis ce qui te ressemble le plus.'}
-      </p>
-    </>
-  );
-}
 
 export default function ChildDashboard() {
   const { user } = useAuth();
@@ -183,27 +148,83 @@ export default function ChildDashboard() {
           </div>
         ) : !dailyState ? (
           /* --- Empty state : le formulaire de l'état du jour --- */
-          <section className="animate-rise">
-            <h2 className="mb-6 font-display text-3xl sm:text-4xl text-ink leading-tight text-center sm:text-left">
-              Comment te sens-tu aujourd'hui, <em className="not-italic" style={{ color: 'var(--sky)' }}>{user.name}</em> ?
-            </h2>
+          <section className="relative">
+            {/* Dawn gradient (matches Hero) */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 -top-16 bottom-0 -z-10"
+              style={{
+                background:
+                  'linear-gradient(180deg, transparent 0%, transparent 40%, oklch(0.93 0.04 240 / 0.35) 100%)',
+              }}
+            />
 
-            <div className="paper-card p-8 sm:p-10 flex flex-col items-center justify-center text-center space-y-10">
+            <h2 className="mb-2 font-display text-4xl sm:text-5xl text-ink leading-[1.05] text-center">
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '0ms' }}>
+                Comment
+              </span>
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '220ms' }}>
+                te
+              </span>
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '440ms' }}>
+                sens-tu
+              </span>
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '660ms' }}>
+                <span className="swash">
+                  aujourd'hui
+                  <svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden>
+                    <path
+                      className="swash-path"
+                      d="M3 9 C 50 3 90 12 140 6 S 196 4 197 7"
+                      fill="none"
+                      stroke="var(--honey)"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      pathLength="1"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                </span>
+                ,
+              </span>
+              <span className="inline-block animate-breath" style={{ animationDelay: '880ms' }}>
+                <em className="not-italic" style={{ color: 'var(--sky)' }}>{user.name}</em>
+                {' ?'}
+              </span>
+            </h2>
+            <p className="mb-10 text-center text-sm text-muted-foreground animate-rise" style={{ animationDelay: '1100ms' }}>
+              Touche celle qui te ressemble le plus.
+            </p>
+
+            <div className="paper-card p-8 sm:p-10 flex flex-col items-center justify-center text-center space-y-10 animate-rise" style={{ animationDelay: '1200ms' }}>
               <div>
-                <h3 className="mb-5 font-display text-xl text-ink">Ton énergie</h3>
-                <EmojiLevelPicker levels={energyLevels} value={energy} onSelect={setEnergy} groupLabel="Niveau d'énergie" />
+                <EnergyPicker
+                  heading="Ton énergie"
+                  choices={energyLevels}
+                  value={energy}
+                  onChange={setEnergy}
+                />
+                <p className="mt-4 text-[15px] font-medium text-ink/75 min-h-[24px]">
+                  {energyLevels.find((l) => l.key === energy)?.note ?? 'Choisis ce qui te ressemble le plus.'}
+                </p>
               </div>
 
               <div>
-                <h3 className="mb-5 font-display text-xl text-ink">Ta concentration</h3>
-                <EmojiLevelPicker levels={focusLevels} value={focus} onSelect={setFocus} groupLabel="Niveau de concentration" />
+                <EnergyPicker
+                  heading="Ta concentration"
+                  choices={focusLevels}
+                  value={focus}
+                  onChange={setFocus}
+                />
+                <p className="mt-4 text-[15px] font-medium text-ink/75 min-h-[24px]">
+                  {focusLevels.find((l) => l.key === focus)?.note ?? 'Choisis ce qui te ressemble le plus.'}
+                </p>
               </div>
 
               <button
                 onClick={submitDailyState}
                 disabled={!energy || !focus || submitting}
-                className="rounded-full px-8 py-3 text-[16px] font-semibold text-white transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105"
-                style={{ background: 'var(--sky)' }}
+                className="btn-paper btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {submitting ? 'On prépare tes missions...' : "C'est parti !"}
               </button>
@@ -218,14 +239,14 @@ export default function ChildDashboard() {
               </h2>
               <div className="paper-card p-6 sm:p-8 flex items-center justify-center gap-8 sm:gap-14">
                 <div className="text-center">
-                  <div className="text-4xl sm:text-5xl" aria-hidden>{selectedEnergy?.glyph}</div>
+                  <div className="text-4xl sm:text-5xl" aria-hidden>{selectedEnergy?.emoji}</div>
                   <div className="mt-2 text-sm font-medium text-muted-foreground">{selectedEnergy?.label}</div>
                 </div>
                 <p className="max-w-xs text-[15px] font-medium text-ink/75">
                   Tes missions du jour sont adaptées à ton humeur. {selectedEnergy?.note}
                 </p>
                 <div className="text-center">
-                  <div className="text-4xl sm:text-5xl" aria-hidden>{selectedFocus?.glyph}</div>
+                  <div className="text-4xl sm:text-5xl" aria-hidden>{selectedFocus?.emoji}</div>
                   <div className="mt-2 text-sm font-medium text-muted-foreground">{selectedFocus?.label}</div>
                 </div>
               </div>
@@ -245,9 +266,11 @@ export default function ChildDashboard() {
 
               <div className="paper-card p-4 sm:p-6">
                 {missions.length === 0 ? (
-                  <div className="text-center text-[15px] font-medium text-muted-foreground py-8">
-                    Aucune mission pour aujourd'hui. Profite de ta journée ! 🎉
-                  </div>
+                  <EmptyState
+                    emoji="🎉"
+                    title="Aucune mission pour aujourd'hui"
+                    description="Profite de ta journée — tu l'as méritée."
+                  />
                 ) : (
                   <ul className="space-y-3">
                     {missions.map((mission) => {

@@ -11,12 +11,16 @@ export function HomeworkCard({
   title,
   subject,
   minutes,
+  dueLabel,
+  dueTone,
   dueInDays,
   dueDateLabel,
   stepsLeft,
   forceHover,
 }) {
-  const due = formatDue(dueInDays, dueDateLabel);
+  const due = dueLabel
+    ? { text: dueLabel, tone: dueTone ?? 'muted' }
+    : formatDue(dueInDays, dueDateLabel);
   const bigTask = minutes >= 30;
 
   return (
