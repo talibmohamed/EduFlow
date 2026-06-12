@@ -251,47 +251,92 @@ export default function ParentDashboard() {
       <Header />
 
       <main className="mx-auto w-full max-w-5xl flex-1 p-6 lg:p-10 space-y-8">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center animate-rise">
-          <div>
-            <h1 className="font-display text-3xl sm:text-4xl text-ink leading-tight">
-              Mes enfants
-            </h1>
-            <p className="mt-2 text-[15px] text-muted-foreground">
-              Bonjour {user.name}. Ajoute un enfant pour suivre son rythme au quotidien.
-            </p>
-          </div>
-          <Button color="primary" onPress={onOpen} className="flex-shrink-0">
-            + Ajouter un enfant
-          </Button>
-        </div>
-
         {error && (
           <div className="paper-card p-4 text-center text-[15px] font-medium text-ink" role="alert">
             {error}
           </div>
         )}
 
-        {loading ? (
-          <div className="paper-card p-10 text-center text-[15px] font-medium text-muted-foreground animate-pulse">
-            Chargement de tes enfants...
-          </div>
-        ) : children.length === 0 ? (
-          <EmptyState
-            emoji="🌿"
-            title="Aucun enfant pour le moment"
-            description="Ajoute ton premier enfant pour commencer à suivre son rythme."
-            action={
-              <Button color="primary" onPress={onOpen}>
+        {!loading && children.length === 0 ? (
+          /* Landing-tier hero — only the first time a parent signs in with no kids */
+          <section className="relative pt-4">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 -top-16 bottom-0 -z-10"
+              style={{
+                background:
+                  'linear-gradient(180deg, transparent 0%, transparent 40%, oklch(0.93 0.04 240 / 0.35) 100%)',
+              }}
+            />
+
+            <h1 className="mb-3 font-display text-4xl sm:text-5xl text-ink leading-[1.05] text-center">
+              <span className="inline-block animate-breath mr-[0.28em]" style={{ animationDelay: '0ms' }}>
+                Bonjour
+              </span>
+              <span className="inline-block animate-breath" style={{ animationDelay: '220ms' }}>
+                <span className="swash">
+                  <em className="not-italic" style={{ color: 'var(--sky)' }}>{user.name}</em>
+                  <svg viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden>
+                    <path
+                      className="swash-path"
+                      d="M3 9 C 50 3 90 12 140 6 S 196 4 197 7"
+                      fill="none"
+                      stroke="var(--honey)"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      pathLength="1"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                </span>
+                .
+              </span>
+            </h1>
+            <p className="mb-10 text-center text-sm text-muted-foreground animate-rise" style={{ animationDelay: '500ms' }}>
+              Ton tableau de bord prendra vie dès que tu auras ajouté ton premier enfant.
+            </p>
+
+            <div className="animate-rise" style={{ animationDelay: '700ms' }}>
+              <EmptyState
+                emoji="🌿"
+                title="Aucun enfant pour le moment"
+                description="Ajoute ton premier enfant pour commencer à suivre son rythme."
+                action={
+                  <Button color="primary" onPress={onOpen}>
+                    + Ajouter un enfant
+                  </Button>
+                }
+              />
+            </div>
+          </section>
+        ) : (
+          <>
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center animate-rise">
+              <div>
+                <h1 className="font-display text-3xl sm:text-4xl text-ink leading-tight">
+                  Mes enfants
+                </h1>
+                <p className="mt-2 text-[15px] text-muted-foreground">
+                  Bonjour {user.name}. Ajoute un enfant pour suivre son rythme au quotidien.
+                </p>
+              </div>
+              <Button color="primary" onPress={onOpen} className="flex-shrink-0">
                 + Ajouter un enfant
               </Button>
-            }
-          />
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 animate-rise" style={{ animationDelay: '100ms' }}>
-            {children.map((child) => (
-              <ChildCard key={child.id} child={child} />
-            ))}
-          </div>
+            </div>
+
+            {loading ? (
+              <div className="paper-card p-10 text-center text-[15px] font-medium text-muted-foreground animate-pulse">
+                Chargement de tes enfants...
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 animate-rise" style={{ animationDelay: '100ms' }}>
+                {children.map((child) => (
+                  <ChildCard key={child.id} child={child} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </main>
 
