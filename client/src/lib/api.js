@@ -17,8 +17,19 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && error.config?.url === '/api/auth/me') {
-      localStorage.removeItem('eduflow_token');
+    if (error.response?.status === 401) {
+      const url = error.config?.url ?? '';
+      // /api/auth/login: let the login form surface the error itself.
+      // /api/auth/me: AuthContext already handles the session-restore failure path.
+      const isAuthEndpoint = url === '/api/auth/login' || url === '/api/auth/me';
+
+      if (!isAuthEndpoint) {
+        localStorage.removeItem('eduflow_token');
+        // Skip redirect if already on /auth to avoid a loop.
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth')) {
+          window.location.replace('/auth');
+        }
+      }
     }
 
     return Promise.reject(error);
