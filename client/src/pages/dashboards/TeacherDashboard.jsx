@@ -7,6 +7,37 @@ import api from '../../lib/api';
 
 const DIFFICULTY_LABEL_FR = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
 
+function ChildCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-border/40 bg-white/60 p-6 shadow-sm animate-pulse flex flex-col gap-4">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <div className="h-5 w-28 rounded-full bg-clay" />
+          <div className="h-3 w-16 rounded-full bg-clay" />
+        </div>
+        <div className="h-5 w-12 rounded-full bg-clay" />
+      </div>
+      <div className="h-3 w-24 rounded-full bg-clay" />
+    </div>
+  );
+}
+
+function HomeworkCardSkeleton() {
+  return (
+    <div className="space-y-2">
+      <div className="h-3 w-20 rounded-full bg-clay animate-pulse" />
+      <div className="hw-card animate-pulse">
+        <div className="flex items-center justify-between">
+          <div className="h-5 w-20 rounded-full bg-clay" />
+          <div className="h-3 w-12 rounded-full bg-clay" />
+        </div>
+        <div className="mt-4 h-5 w-3/4 rounded-full bg-clay" />
+        <div className="mt-4 h-3 w-1/2 rounded-full bg-clay" />
+      </div>
+    </div>
+  );
+}
+
 export default function TeacherDashboard() {
   const { user } = useAuth();
   const [children, setChildren] = useState([]);
@@ -67,7 +98,9 @@ export default function TeacherDashboard() {
 
           <div className="p-6 sm:p-8">
             {loading ? (
-              <p className="text-muted-foreground text-sm">Chargement…</p>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {[0, 1, 2].map((i) => <ChildCardSkeleton key={i} />)}
+              </div>
             ) : children.length === 0 ? (
               <EmptyState
                 emoji="🌿"
@@ -109,7 +142,9 @@ export default function TeacherDashboard() {
 
           <div className="p-6 sm:p-8">
             {loading ? (
-              <p className="text-muted-foreground text-sm">Chargement…</p>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {[0, 1, 2].map((i) => <HomeworkCardSkeleton key={i} />)}
+              </div>
             ) : homework.length === 0 ? (
               <EmptyState
                 emoji="✏️"
