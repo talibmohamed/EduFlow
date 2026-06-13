@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'; // <-- Ajout de l'import Link
 import Header from '../../components/Header';
 import { useAuth } from '../../contexts/AuthContext';
 import { EmptyState, EnergyPicker } from '../../components/ui';
@@ -131,7 +132,7 @@ export default function ChildDashboard() {
   const selectedFocus = dailyState && focusLevels.find((l) => l.key === dailyState.focusLevel);
 
   return (
-    <div className="flex min-h-screen flex-col selection:bg-[var(--sky)] selection:text-white" style={{ background: 'var(--linen)' }}>
+    <div className="flex min-h-screen flex-col bg-linen text-ink selection:bg-[var(--sky)] selection:text-white">
       <Header />
 
       <main className="mx-auto w-full max-w-4xl flex-1 p-6 lg:p-10 space-y-12">
@@ -334,15 +335,16 @@ export default function ChildDashboard() {
               </div>
             </section>
 
-            {/* --- Zone 3: Progression positive --- */}
+{/* --- Zone 3: Progression positive --- */}
             <section className="animate-rise" style={{ animationDelay: '200ms' }}>
               <h2 className="mb-5 font-display text-2xl sm:text-3xl text-ink flex items-center gap-3">
                 <span aria-hidden className="text-[1.2em]">🌱</span>
                 Ta progression
               </h2>
               <div className="paper-card p-6 sm:p-8 border-t-4 shadow-sm transition-all duration-500" style={{ borderTopColor: isAllDone ? 'var(--meadow)' : 'var(--clay)' }}>
+                
+                {/* Condition : État vide ou Barre de progression */}
                 {(!progress || (progress.completed === 0 && progress.postponed === 0)) ? (
-                  /* Cahier §4.10.3 — neutral message before any task action */
                   <EmptyState
                     emoji="🌱"
                     title="Ta progression apparaîtra ici"
@@ -350,14 +352,12 @@ export default function ChildDashboard() {
                   />
                 ) : (
                   <div className="space-y-6">
-                    {/* Message positif généré par le serveur */}
                     <div className="text-center text-lg font-medium" style={{ color: isAllDone ? 'var(--meadow)' : 'var(--ink)' }}>
                       {isAllDone
                         ? `Bravo ${user.name} ! Tu as terminé toutes tes missions pour aujourd'hui. 🎉`
                         : progress?.message ?? 'Continue à ton rythme.'}
                     </div>
 
-                    {/* Barre de progression visuelle */}
                     {missions.length > 0 && (
                       <div className="h-3 w-full rounded-full bg-white/60 overflow-hidden shadow-inner">
                         <div
@@ -370,13 +370,24 @@ export default function ChildDashboard() {
                       </div>
                     )}
 
-                    {/* Compteurs du jour (depuis l'API) */}
-                    <div className="flex items-center justify-center gap-8 text-sm font-medium text-muted-foreground">
+                    <div className="flex items-center justify-center gap-8 text-sm font-medium text-muted-foreground mt-6">
                       <span>✅ {progress.completed} terminée{progress.completed > 1 ? 's' : ''}</span>
                       <span>🕊️ {progress.postponed} reportée{progress.postponed > 1 ? 's' : ''}</span>
                     </div>
                   </div>
                 )}
+
+                {/* --- LE BOUTON EST MAINTENANT ICI : TOUJOURS VISIBLE --- */}
+                <div className="pt-6 mt-6 flex justify-center border-t border-border/40">
+                  <Link 
+                    to="/child/progress" 
+                    className="btn-paper btn-ghost text-[15px] flex items-center gap-2 transition-transform hover:scale-105"
+                    style={{ color: 'var(--sky)' }}
+                  >
+                    <span aria-hidden className="text-lg">🏆</span> Voir mon historique de la semaine
+                  </Link>
+                </div>
+
               </div>
             </section>
           </>

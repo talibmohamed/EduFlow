@@ -11,6 +11,8 @@ import TeacherReports from './pages/teacher/TeacherReports';
 import UiKit from './pages/UiKit';
 import ChildDetail from './pages/parent/ChildDetail';
 
+// 1. Ajout de l'import pour la nouvelle page
+import ChildProgress from './pages/child/ChildProgress';
 
 export default function App() {
   return (
@@ -31,6 +33,16 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={['child']}>
               <ChildDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 2. Ajout de la route protégée pour l'historique de l'enfant */}
+        <Route
+          path="/child/progress"
+          element={
+            <ProtectedRoute allowedRoles={['child']}>
+              <ChildProgress />
             </ProtectedRoute>
           }
         />
