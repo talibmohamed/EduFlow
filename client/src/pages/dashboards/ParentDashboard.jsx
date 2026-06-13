@@ -150,29 +150,26 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
               </div>
             )}
             <Input
-              isRequired
-              label="Prénom"
-              placeholder="Léa"
+              label="Prénom (requis)"
+              placeholder="Prénom"
               value={name}
               onValueChange={handleNameChange}
               variant="bordered"
               radius="lg"
             />
             <Input
-              isRequired
-              label="Identifiant"
+              label="Identifiant (requis)"
               description="Lettres, chiffres, tirets uniquement. 3 à 60 caractères."
-              placeholder="lea"
+              placeholder="identifiant"
               value={username}
               onValueChange={handleUsernameChange}
               variant="bordered"
               radius="lg"
             />
             <Input
-              isRequired
-              label="Code à 4 chiffres"
+              label="Code à 4 chiffres (requis)"
               description="Partage-le avec ton enfant pour qu'il puisse se connecter."
-              placeholder="0000"
+              placeholder="••••"
               value={pin}
               onValueChange={handlePinChange}
               variant="bordered"
@@ -183,7 +180,7 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <Input
                 label="Âge"
-                placeholder="11"
+                placeholder="Âge"
                 value={age}
                 onValueChange={setAge}
                 type="number"
@@ -194,7 +191,7 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
               />
               <Input
                 label="Classe"
-                placeholder="6ème"
+                placeholder="Classe"
                 value={classLevel}
                 onValueChange={setClassLevel}
                 variant="bordered"
