@@ -120,7 +120,7 @@ function AddStudentModal({ isOpen, onClose, onAdded }) {
         <ModalHeader className="flex flex-col gap-2">
           <span className="font-display text-2xl text-ink">Ajouter un élève</span>
           <span className="text-sm font-normal leading-relaxed text-muted-foreground">
-            Saisis l'identifiant de l'élève. Demande-le à son parent si tu ne l'as pas.
+            Sélectionne un élève existant pour l'ajouter à ta classe.
           </span>
         </ModalHeader>
         <ModalBody>
@@ -132,7 +132,6 @@ function AddStudentModal({ isOpen, onClose, onAdded }) {
             )}
             <Select
               autoFocus
-              isRequired
               label="Élève"
               placeholder={loadingChildren ? 'Chargement...' : 'Choisir un élève'}
               selectedKeys={selectedChildId ? new Set([selectedChildId]) : new Set()}
