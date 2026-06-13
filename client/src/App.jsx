@@ -10,6 +10,7 @@ import CreateHomework from './pages/teacher/CreateHomework';
 import TeacherReports from './pages/teacher/TeacherReports';
 import UiKit from './pages/UiKit';
 import ChildDetail from './pages/parent/ChildDetail';
+import ChildHomeworkDetail from './pages/child/ChildHomeworkDetail';
 
 // 1. Ajout de l'import pour la nouvelle page
 import ChildProgress from './pages/child/ChildProgress';
@@ -87,6 +88,15 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={['teacher']}>
               <TeacherReports />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/child/homework/:id"
+          element={
+            <ProtectedRoute allowedRoles={['child']}>
+              <ChildHomeworkDetail />
             </ProtectedRoute>
           }
         />
