@@ -298,7 +298,7 @@ function FormError({ message }) {
   if (!message) return null;
   return (
     <div
-      className="rounded-xl border border-border/60 bg-clay/40 p-3 text-[13px] font-medium text-ink"
+      className="rounded-xl border border-border bg-clay p-3 text-sm font-medium text-ink"
       role="alert"
     >
       {message}
@@ -353,7 +353,7 @@ function AdultSignInForm({ onSuccess }) {
       const user = await login(email, password);
       onSuccess(user);
     } catch (err) {
-      setError(err.response?.data?.message || 'Connexion impossible. Réessaie.');
+      setError(err.response?.data?.message || 'Identifiants incorrects.');
     } finally {
       setSubmitting(false);
     }
@@ -418,8 +418,8 @@ function ChildSignInForm({ onSuccess }) {
     try {
       const user = await loginAsChild(username.trim().toLowerCase(), pin);
       onSuccess(user);
-    } catch {
-      setError("Identifiant ou code incorrect. Réessaie.");
+    } catch (err) {
+      setError(err.response?.data?.message || 'Identifiants incorrects.');
     } finally {
       setSubmitting(false);
     }
