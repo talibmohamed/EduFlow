@@ -28,6 +28,81 @@ router.get('/children', async (req, res) => {
 });
 
 // POST /api/teacher/children — claim an existing child by username
+// GET /api/teacher/children/available — list children not assigned to this teacher
+router.get('/children/available', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u.name, u.email, u.username, cp.age, cp.class_level
+       FROM users u
+       LEFT JOIN children_profiles cp ON cp.user_id = u.id
+       WHERE u.role = 'child'
+         AND NOT EXISTS (
+           SELECT 1 FROM teacher_children tc
+           WHERE tc.teacher_id = $1 AND tc.child_id = u.id
+         )
+       ORDER BY u.name`,
+      [req.user.id],
+    );
+    return res.status(200).json({ success: true, data: { children: result.rows } });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /api/teacher/children — claim an existing child by id from the select list
+router.post('/children', async (req, res, next) => {
+  if (req.body.childId === undefined) {
+    return next();
+  }
+
+  const childId = Number(req.body.childId);
+  if (!Number.isInteger(childId) || childId <= 0) {
+    return res.status(400).json({ success: false, message: 'Élève invalide.' });
+  }
+
+  try {
+    const userResult = await pool.query(
+      'SELECT id, role FROM users WHERE id = $1',
+      [childId],
+    );
+
+    if (userResult.rows.length === 0 || userResult.rows[0].role !== 'child') {
+      return res.status(404).json({
+        success: false,
+        message: 'Aucun élève trouvé.',
+      });
+    }
+
+    await pool.query(
+      'INSERT INTO teacher_children (teacher_id, child_id) VALUES ($1, $2)',
+      [req.user.id, childId],
+    );
+
+    const childResult = await pool.query(
+      `SELECT u.id, u.name, u.email, cp.age, cp.class_level
+       FROM users u
+       LEFT JOIN children_profiles cp ON cp.user_id = u.id
+       WHERE u.id = $1`,
+      [childId],
+    );
+
+    return res.status(201).json({
+      success: true,
+      data: { child: childResult.rows[0] },
+    });
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        success: false,
+        message: 'Cet élève est déjà dans ta classe.',
+      });
+    }
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 router.post('/children', async (req, res) => {
   if (typeof req.body.username !== 'string') {
     return res.status(400).json({ success: false, message: 'Identifiant invalide.' });
@@ -81,6 +156,35 @@ router.post('/children', async (req, res) => {
   }
 });
 
+// DELETE /api/teacher/children/:childId — remove a child from this teacher's class
+router.delete('/children/:childId', async (req, res) => {
+  const childId = Number(req.params.childId);
+  if (!Number.isInteger(childId) || childId <= 0) {
+    return res.status(400).json({ success: false, message: 'Élève invalide.' });
+  }
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM teacher_children
+       WHERE teacher_id = $1 AND child_id = $2
+       RETURNING child_id`,
+      [req.user.id, childId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Élève introuvable dans ta classe.',
+      });
+    }
+
+    return res.status(200).json({ success: true, message: 'Élève retiré' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // C2: GET /api/teacher/homework
 router.get('/homework', async (req, res) => {
   try {
@@ -91,6 +195,7 @@ router.get('/homework', async (req, res) => {
               u.id AS child_id, u.name AS child_name
        FROM homework h
        JOIN users u ON u.id = h.child_id
+       JOIN teacher_children tc ON tc.child_id = h.child_id AND tc.teacher_id = h.teacher_id
        WHERE h.teacher_id = $1
        ORDER BY h.created_at DESC`,
       [req.user.id],

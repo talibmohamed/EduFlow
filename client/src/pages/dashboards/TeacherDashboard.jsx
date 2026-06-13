@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import {
   Button,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
   useDisclosure,
 } from '@heroui/react';
 import { Link } from 'react-router-dom';
@@ -16,7 +17,6 @@ import { EmptyState, HomeworkCard } from '../../components/ui';
 import api from '../../lib/api';
 
 const DIFFICULTY_LABEL_FR = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
-const USERNAME_PATTERN = /^[a-z0-9_-]+$/;
 
 function ChildCardSkeleton() {
   return (
@@ -50,20 +50,43 @@ function HomeworkCardSkeleton() {
 }
 
 function AddStudentModal({ isOpen, onClose, onAdded }) {
-  const [username, setUsername] = useState('');
+  const [availableChildren, setAvailableChildren] = useState([]);
+  const [selectedChildId, setSelectedChildId] = useState('');
+  const [loadingChildren, setLoadingChildren] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const isValid = username.length >= 3 && username.length <= 60 && USERNAME_PATTERN.test(username);
+  useEffect(() => {
+    if (!isOpen) return;
+
+    async function loadAvailableChildren() {
+      setLoadingChildren(true);
+      setError('');
+      try {
+        const res = await api.get('/api/teacher/children/available');
+        setAvailableChildren(res.data.data.children);
+      } catch (err) {
+        setError(err.response?.data?.message || "Impossible de charger la liste des élèves.");
+      } finally {
+        setLoadingChildren(false);
+      }
+    }
+
+    loadAvailableChildren();
+  }, [isOpen]);
+
+  const canSubmit = Boolean(selectedChildId) && !loadingChildren;
 
   function reset() {
-    setUsername('');
+    setAvailableChildren([]);
+    setSelectedChildId('');
+    setLoadingChildren(false);
     setError('');
     setSubmitting(false);
   }
 
-  function handleUsernameChange(value) {
-    setUsername(value.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 60));
+  function handleSelectionChange(keys) {
+    setSelectedChildId(Array.from(keys)[0] || '');
     setError('');
   }
 
@@ -75,12 +98,12 @@ function AddStudentModal({ isOpen, onClose, onAdded }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (submitting || !isValid) return;
+    if (submitting || !canSubmit) return;
 
     setError('');
     setSubmitting(true);
     try {
-      const res = await api.post('/api/teacher/children', { username });
+      const res = await api.post('/api/teacher/children', { childId: Number(selectedChildId) });
       onAdded(res.data.data.child);
       reset();
       onClose();
@@ -107,22 +130,38 @@ function AddStudentModal({ isOpen, onClose, onAdded }) {
                 {error}
               </div>
             )}
-            <Input
+            <Select
               autoFocus
               isRequired
-              label="Identifiant"
-              description="Lettres, chiffres, tirets uniquement. 3 à 60 caractères."
-              placeholder="lucas"
-              value={username}
-              onValueChange={handleUsernameChange}
+              label="Élève"
+              placeholder={loadingChildren ? 'Chargement...' : 'Choisir un élève'}
+              selectedKeys={selectedChildId ? new Set([selectedChildId]) : new Set()}
+              onSelectionChange={handleSelectionChange}
+              isDisabled={loadingChildren || availableChildren.length === 0}
               variant="bordered"
               radius="lg"
               classNames={{
-                inputWrapper: 'min-h-11 border-border bg-card',
+                trigger: 'min-h-11 border-border bg-card',
                 label: 'text-ink',
-                description: 'text-muted-foreground',
               }}
-            />
+            >
+              {availableChildren.map((child) => {
+                const details = [child.username, child.class_level].filter(Boolean).join(' · ');
+                return (
+                  <SelectItem key={String(child.id)} textValue={child.name}>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-ink">{child.name}</span>
+                      {details && <span className="text-xs text-muted-foreground">{details}</span>}
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </Select>
+            {!loadingChildren && availableChildren.length === 0 && (
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Tous les élèves existants sont déjà dans ta classe.
+              </p>
+            )}
           </form>
         </ModalBody>
         <ModalFooter>
@@ -133,7 +172,7 @@ function AddStudentModal({ isOpen, onClose, onAdded }) {
             color="primary"
             type="submit"
             form="add-student-form"
-            isDisabled={!isValid || submitting}
+            isDisabled={!canSubmit || submitting}
             isLoading={submitting}
             className="min-h-11"
           >
@@ -152,6 +191,7 @@ export default function TeacherDashboard() {
   const [homework, setHomework] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [removingChildId, setRemovingChildId] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -173,6 +213,22 @@ export default function TeacherDashboard() {
 
   function handleAdded(child) {
     setChildren((prev) => [...prev, child].sort((a, b) => a.name.localeCompare(b.name)));
+  }
+
+  async function handleRemove(childId) {
+    if (removingChildId) return;
+
+    setRemovingChildId(childId);
+    setError(null);
+    try {
+      await api.delete(`/api/teacher/children/${childId}`);
+      setChildren((prev) => prev.filter((child) => child.id !== childId));
+      setHomework((prev) => prev.filter((hw) => hw.child.id !== childId));
+    } catch (err) {
+      setError(err.response?.data?.message || "Impossible de retirer cet élève pour le moment.");
+    } finally {
+      setRemovingChildId(null);
+    }
   }
 
   return (
@@ -241,7 +297,24 @@ export default function TeacherDashboard() {
                         {child.age ? `${child.age} ans` : '—'}
                       </span>
                     </div>
-                    <span className="text-xs text-sky-600 font-medium">Voir le rapport →</span>
+                    <span className="text-xs text-sky font-medium">Voir le rapport →</span>
+                    <div className="mt-5 border-t border-border/40 pt-3">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="light"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          handleRemove(child.id);
+                        }}
+                        isLoading={removingChildId === child.id}
+                        isDisabled={Boolean(removingChildId)}
+                        className="min-h-11 px-0 text-muted-foreground"
+                      >
+                        Retirer de ma classe
+                      </Button>
+                    </div>
                   </Link>
                 ))}
               </div>
