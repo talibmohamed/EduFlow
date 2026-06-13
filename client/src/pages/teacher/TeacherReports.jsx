@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import { EmptyState, HomeworkCard } from '../../components/ui';
 import api from '../../lib/api';
+import { formatDateFr } from '../../lib/format';
 
 const DIFFICULTY_LABEL_FR = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
 
@@ -180,7 +181,7 @@ export default function TeacherReports() {
                             title={hw.title}
                             subject={hw.subject}
                             minutes={hw.estimatedMinutes}
-                            dueLabel={`dû le ${hw.dueDate}`}
+                            dueLabel={`dû le ${formatDateFr(hw.dueDate)}`}
                             difficulty={hw.difficulty}
                             difficultyLabel={DIFFICULTY_LABEL_FR[hw.difficulty]}
                           />

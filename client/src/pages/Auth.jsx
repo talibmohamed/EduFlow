@@ -191,7 +191,7 @@ function WelcomeWhisper({ mode, signinRole }) {
     : [
         'Un état du matin en deux secondes.',
         "Une journée qui s'ajuste à ton énergie.",
-        'Pas de retard, jamais.',
+        'Sans pression, à ton rythme.',
       ];
 
   return (

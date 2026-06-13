@@ -64,6 +64,7 @@ function ChildCard({ child }) {
 
 function AddChildModal({ isOpen, onClose, onCreated }) {
   const [name, setName] = useState('');
+  const [rawUsernameInput, setRawUsernameInput] = useState('');
   const [username, setUsername] = useState('');
   const [usernameTouched, setUsernameTouched] = useState(false);
   const [pin, setPin] = useState('');
@@ -76,12 +77,15 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
   function handleNameChange(value) {
     setName(value);
     if (!usernameTouched) {
-      setUsername(suggestUsername(value));
+      const suggestedUsername = suggestUsername(value);
+      setRawUsernameInput(suggestedUsername);
+      setUsername(suggestedUsername);
     }
   }
 
   function handleUsernameChange(value) {
     setUsernameTouched(true);
+    setRawUsernameInput(value);
     setUsername(value.toLowerCase());
   }
 
@@ -93,6 +97,7 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
 
   function reset() {
     setName('');
+    setRawUsernameInput('');
     setUsername('');
     setUsernameTouched(false);
     setPin('');
@@ -150,29 +155,31 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
               </div>
             )}
             <Input
-              isRequired
-              label="Prénom"
-              placeholder="Léa"
+              label="Prénom (requis)"
+              placeholder="Prénom"
               value={name}
               onValueChange={handleNameChange}
               variant="bordered"
               radius="lg"
             />
             <Input
-              isRequired
-              label="Identifiant"
+              label="Identifiant (requis)"
               description="Lettres, chiffres, tirets uniquement. 3 à 60 caractères."
-              placeholder="lea"
-              value={username}
+              placeholder="identifiant"
+              value={rawUsernameInput}
               onValueChange={handleUsernameChange}
               variant="bordered"
               radius="lg"
             />
+            {rawUsernameInput !== rawUsernameInput.toLowerCase() && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Les majuscules sont converties en minuscules.
+              </p>
+            )}
             <Input
-              isRequired
-              label="Code à 4 chiffres"
+              label="Code à 4 chiffres (requis)"
               description="Partage-le avec ton enfant pour qu'il puisse se connecter."
-              placeholder="0000"
+              placeholder="••••"
               value={pin}
               onValueChange={handlePinChange}
               variant="bordered"
@@ -180,10 +187,13 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
               inputMode="numeric"
               maxLength={4}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              4 chiffres.
+            </p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <Input
                 label="Âge"
-                placeholder="11"
+                placeholder="Âge"
                 value={age}
                 onValueChange={setAge}
                 type="number"
@@ -194,7 +204,7 @@ function AddChildModal({ isOpen, onClose, onCreated }) {
               />
               <Input
                 label="Classe"
-                placeholder="6ème"
+                placeholder="Classe"
                 value={classLevel}
                 onValueChange={setClassLevel}
                 variant="bordered"

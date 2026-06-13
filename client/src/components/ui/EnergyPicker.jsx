@@ -62,11 +62,27 @@ export function EnergyPicker({ heading, choices, value, onChange }) {
                   animationDelay: `${index * 1200}ms`,
                 }}
               >
-                <EmojiButton
-                  emoji={choice.emoji}
-                  label={choice.label}
-                  onClick={() => handleSelect(choice.key)}
-                  selected={isSelected}
+                <div
+                  className={
+                    isSelected
+                      ? 'rounded-full ring-2 ring-sky/40 shadow-[0_0_0_4px_oklch(0.58_0.19_263/0.18)] transition-shadow duration-300'
+                      : 'rounded-full transition-shadow duration-300'
+                  }
+                >
+                  <EmojiButton
+                    emoji={choice.emoji}
+                    label={choice.label}
+                    onClick={() => handleSelect(choice.key)}
+                    selected={isSelected}
+                  />
+                </div>
+                <span
+                  aria-hidden
+                  className={
+                    isSelected
+                      ? 'mx-auto mt-2 block h-0.5 w-8 rounded-full bg-sky transition-opacity duration-300'
+                      : 'mx-auto mt-2 block h-0.5 w-8 rounded-full bg-transparent transition-opacity duration-300'
+                  }
                 />
               </div>
             );
