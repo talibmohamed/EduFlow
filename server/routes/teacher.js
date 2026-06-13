@@ -165,29 +165,62 @@ function subtaskCountForMinutes(minutes) {
   return 3;
 }
 
+function isValidIsoDate(value) {
+  if (typeof value !== 'string') return false;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return date.getUTCFullYear() === year
+    && date.getUTCMonth() === month - 1
+    && date.getUTCDate() === day;
+}
+
 // C1: POST /api/teacher/homework + subtask auto-generation (1/2/3 rule by duration)
 router.post('/homework', async (req, res) => {
   const { childId, title, description, subject, dueDate, estimatedMinutes, difficulty, priority } = req.body;
 
-  if (!childId || !title?.trim() || !subject?.trim() || !dueDate || !estimatedMinutes || !difficulty) {
-    return res.status(400).json({ success: false, message: 'Missing required fields' });
-  }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate) || isNaN(Date.parse(dueDate))) {
-    return res.status(400).json({ success: false, message: 'dueDate must be a valid date (YYYY-MM-DD)' });
-  }
-  if (!['easy', 'medium', 'hard'].includes(difficulty)) {
-    return res.status(400).json({ success: false, message: 'difficulty must be easy, medium, or hard' });
-  }
-
   const parsedChildId = Number(childId);
   const parsedMinutes = Number(estimatedMinutes);
-  const parsedPriority = Number(priority) || 2;
+  const parsedPriority = priority === undefined || priority === null || priority === '' ? 2 : Number(priority);
+  const titleText = typeof title === 'string' ? title.trim() : '';
+  const subjectText = typeof subject === 'string' ? subject.trim() : '';
+  const descriptionText = typeof description === 'string' && description.trim() ? description.trim() : null;
 
   if (!Number.isInteger(parsedChildId) || parsedChildId <= 0) {
-    return res.status(400).json({ success: false, message: 'childId invalid' });
+    return res.status(400).json({ success: false, message: 'Sélectionne un élève valide' });
+  }
+  if (titleText.length < 3 || titleText.length > 160) {
+    return res.status(400).json({ success: false, message: 'Le titre doit comporter entre 3 et 160 caractères' });
+  }
+  if (subjectText.length < 1 || subjectText.length > 80) {
+    return res.status(400).json({ success: false, message: 'La matière doit comporter entre 1 et 80 caractères' });
+  }
+  if (!isValidIsoDate(dueDate)) {
+    return res.status(400).json({ success: false, message: 'Choisis une date limite valide' });
+  }
+  if (!['easy', 'medium', 'hard'].includes(difficulty)) {
+    return res.status(400).json({ success: false, message: 'Le niveau de difficulté est invalide' });
   }
   if (!Number.isInteger(parsedMinutes) || parsedMinutes <= 0) {
-    return res.status(400).json({ success: false, message: 'estimatedMinutes must be a positive integer' });
+    return res.status(400).json({ success: false, message: 'La durée estimée doit être un nombre positif' });
+  }
+  if (!Number.isInteger(parsedPriority) || parsedPriority < 1 || parsedPriority > 3) {
+    return res.status(400).json({ success: false, message: 'La priorité est invalide' });
+  }
+
+  try {
+    const dateCheck = await pool.query('SELECT $1::date < CURRENT_DATE AS is_past', [dueDate]);
+    if (dateCheck.rows[0].is_past) {
+      return res.status(400).json({ success: false, message: 'La date limite ne peut pas être passée' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 
   const client = await pool.connect();
@@ -208,7 +241,7 @@ router.post('/homework', async (req, res) => {
          (child_id, teacher_id, title, description, subject, due_date, estimated_minutes, difficulty, priority)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id`,
-      [parsedChildId, req.user.id, title.trim(), description?.trim() || null, subject.trim(), dueDate, parsedMinutes, difficulty, parsedPriority],
+      [parsedChildId, req.user.id, titleText, descriptionText, subjectText, dueDate, parsedMinutes, difficulty, parsedPriority],
     );
     const homeworkId = hwResult.rows[0].id;
 
@@ -229,14 +262,14 @@ router.post('/homework', async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Homework created',
+      message: 'Devoir créé',
       data: {
         homework: {
           id: homeworkId,
           childId: parsedChildId,
-          title: title.trim(),
-          description: description?.trim() || null,
-          subject: subject.trim(),
+          title: titleText,
+          description: descriptionText,
+          subject: subjectText,
           dueDate,
           estimatedMinutes: parsedMinutes,
           difficulty,

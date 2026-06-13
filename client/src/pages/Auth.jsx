@@ -8,6 +8,28 @@ const dashboardByRole = {
   teacher: '/teacher/dashboard',
 };
 
+const routePrefixesByRole = {
+  child: ['/child'],
+  parent: ['/parent'],
+  teacher: ['/teacher'],
+};
+
+function getRedirectForUser(user, next) {
+  const fallback = dashboardByRole[user.role] ?? '/';
+  const allowedPrefixes = routePrefixesByRole[user.role] ?? [];
+
+  if (
+    typeof next === 'string'
+    && next.startsWith('/')
+    && !next.startsWith('//')
+    && allowedPrefixes.some((prefix) => next === prefix || next.startsWith(`${prefix}/`))
+  ) {
+    return next;
+  }
+
+  return fallback;
+}
+
 const inputClass =
   'w-full rounded-[14px] border border-border bg-card px-4 py-3 text-[15px] text-ink placeholder:text-muted-foreground/70 outline-none transition-shadow duration-300 focus:border-sky/50 focus:shadow-[0_0_0_4px_oklch(0.58_0.19_263/0.12)]';
 
@@ -39,7 +61,7 @@ export default function Auth() {
   }
 
   function onAuthSuccess(user) {
-    navigate(dashboardByRole[user.role] ?? '/', { replace: true });
+    navigate(getRedirectForUser(user, searchParams.get('next')), { replace: true });
   }
 
   return (
