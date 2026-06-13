@@ -224,9 +224,9 @@ export default function CreateHomework() {
                   onChange={handleChange}
                   className={selectClass}
                 >
-                  <option value="3">Haute (Très urgent)</option>
-                  <option value="2">Normale</option>
-                  <option value="1">Basse</option>
+                  <option value="3">Priorité haute</option>
+                  <option value="2">Priorité normale</option>
+                  <option value="1">Priorité basse</option>
                 </select>
               </div>
             </div>
