@@ -9,11 +9,44 @@ const selectClass = `${inputClass} cursor-pointer`;
 const textareaClass =
   'w-full p-4 bg-card border border-border rounded-xl text-ink placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky transition-colors resize-y';
 
+function todayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function validateHomeworkForm(formData, today) {
+  const title = formData.title.trim();
+  const subject = formData.subject.trim();
+  const estimatedMinutes = Number(formData.estimatedMinutes);
+  const childId = Number(formData.childId);
+
+  if (title.length < 3 || title.length > 160) {
+    return 'Le titre doit comporter entre 3 et 160 caractères.';
+  }
+  if (!Number.isInteger(childId) || childId <= 0) {
+    return 'Sélectionne un élève.';
+  }
+  if (subject.length < 1 || subject.length > 80) {
+    return 'La matière doit comporter entre 1 et 80 caractères.';
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.dueDate)) {
+    return 'Choisis une date limite valide.';
+  }
+  if (formData.dueDate < today) {
+    return 'La date limite ne peut pas être passée.';
+  }
+  if (!Number.isInteger(estimatedMinutes) || estimatedMinutes <= 0) {
+    return 'La durée estimée doit être un nombre positif.';
+  }
+
+  return null;
+}
+
 export default function CreateHomework() {
   const navigate = useNavigate();
   const [myStudents, setMyStudents] = useState([]);
   const [submitError, setSubmitError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const today = todayIsoDate();
 
   useEffect(() => {
     api.get('/api/teacher/children').then((res) => {
@@ -39,13 +72,20 @@ export default function CreateHomework() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
+
+    const validationError = validateHomeworkForm(formData, today);
+    if (validationError) {
+      setSubmitError(validationError);
+      return;
+    }
+
     setSubmitting(true);
     try {
       await api.post('/api/teacher/homework', {
         childId: Number(formData.childId),
-        title: formData.title,
-        description: formData.description,
-        subject: formData.subject,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        subject: formData.subject.trim(),
         dueDate: formData.dueDate,
         estimatedMinutes: Number(formData.estimatedMinutes),
         difficulty: formData.difficulty,
@@ -84,7 +124,7 @@ export default function CreateHomework() {
         </div>
 
         <div className="paper-card animate-rise" style={{ animationDelay: '100ms' }}>
-          <form onSubmit={handleSubmit} className="p-8 sm:p-10 space-y-8">
+          <form onSubmit={handleSubmit} noValidate className="p-8 sm:p-10 space-y-8">
 
             {/* Ligne 1 : Titre et Élève */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -93,7 +133,8 @@ export default function CreateHomework() {
                 <input
                   type="text"
                   name="title"
-                  required
+                  minLength={3}
+                  maxLength={160}
                   value={formData.title}
                   onChange={handleChange}
                   placeholder="Ex: Exercices de fractions"
@@ -104,7 +145,6 @@ export default function CreateHomework() {
                 <label className="text-[15px] font-medium text-ink">Assigner à *</label>
                 <select
                   name="childId"
-                  required
                   value={formData.childId}
                   onChange={handleChange}
                   className={selectClass}
@@ -124,7 +164,7 @@ export default function CreateHomework() {
                 <input
                   type="text"
                   name="subject"
-                  required
+                  maxLength={80}
                   value={formData.subject}
                   onChange={handleChange}
                   placeholder="Ex: Mathématiques"
@@ -136,7 +176,7 @@ export default function CreateHomework() {
                 <input
                   type="date"
                   name="dueDate"
-                  required
+                  min={today}
                   value={formData.dueDate}
                   onChange={handleChange}
                   className={selectClass}
@@ -154,8 +194,7 @@ export default function CreateHomework() {
                   <input
                     type="number"
                     name="estimatedMinutes"
-                    required
-                    min="5"
+                    min="1"
                     value={formData.estimatedMinutes}
                     onChange={handleChange}
                     placeholder="Ex: 40"
