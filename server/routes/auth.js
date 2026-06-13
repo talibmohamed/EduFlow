@@ -16,19 +16,19 @@ function signToken(user) {
 
 function validateRegister({ name, email, password, role }) {
   if (typeof name !== 'string' || name.trim().length < 2 || name.trim().length > 120) {
-    return 'name invalid';
+    return 'Le nom est invalide';
   }
 
   if (typeof email !== 'string' || !emailPattern.test(email.trim())) {
-    return 'email invalid';
+    return "L'adresse email est invalide";
   }
 
   if (typeof password !== 'string' || password.length < 8) {
-    return 'password invalid';
+    return 'Le mot de passe doit comporter au moins 8 caractères';
   }
 
   if (!roles.includes(role)) {
-    return 'role invalid';
+    return 'Le rôle est invalide';
   }
 
   return null;
@@ -70,16 +70,16 @@ router.post('/register', async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Account created',
+      message: 'Compte créé',
       data: { token, user },
     });
   } catch (error) {
     if (error.code === '23505') {
-      return res.status(409).json({ success: false, message: 'Email already registered' });
+      return res.status(409).json({ success: false, message: 'Cette adresse email est déjà utilisée' });
     }
 
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Erreur serveur, réessaie dans un instant' });
   }
 });
 
@@ -96,19 +96,19 @@ router.post('/login', async (req, res) => {
   if (!usingEmail && !usingUsername) {
     return res.status(400).json({
       success: false,
-      message: 'Provide either email+password or username+pin',
+      message: 'Fournis soit email + mot de passe, soit identifiant + code PIN',
     });
   }
   if (usingEmail && usingUsername) {
     return res.status(400).json({
       success: false,
-      message: 'Provide only one credential pair',
+      message: "Fournis un seul type d'identifiants",
     });
   }
   if (usingUsername && !pinPattern.test(pinRaw)) {
     return res.status(400).json({
       success: false,
-      message: 'PIN must be 4 digits',
+      message: 'Le code PIN doit comporter 4 chiffres',
     });
   }
 
@@ -121,14 +121,14 @@ router.post('/login', async (req, res) => {
     const userRow = result.rows[0];
 
     if (!userRow) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
     }
 
     const secret = usingEmail ? passwordRaw : pinRaw;
     const secretMatches = await bcrypt.compare(secret, userRow.password_hash);
 
     if (!secretMatches) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Identifiants incorrects' });
     }
 
     const user = publicUser(userRow);
@@ -136,12 +136,12 @@ router.post('/login', async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Logged in',
+      message: 'Connecté',
       data: { token, user },
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Erreur serveur, réessaie dans un instant' });
   }
 });
 
@@ -154,13 +154,13 @@ router.get('/me', requireAuth, async (req, res) => {
     const user = result.rows[0];
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Authentication required' });
+      return res.status(401).json({ success: false, message: 'Authentification requise' });
     }
 
     return res.status(200).json({ success: true, data: { user: publicUser(user) } });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Erreur serveur, réessaie dans un instant' });
   }
 });
 

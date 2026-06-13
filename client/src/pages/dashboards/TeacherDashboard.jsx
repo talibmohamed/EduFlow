@@ -142,13 +142,15 @@ function AddStudentModal({ isOpen, onClose, onAdded }) {
               radius="lg"
               classNames={{
                 trigger: 'min-h-11 border-border bg-card',
+                popoverContent: 'border border-border bg-linen text-ink shadow-[var(--shadow-paper)]',
+                listbox: 'bg-linen',
                 label: 'text-ink',
               }}
             >
               {availableChildren.map((child) => {
                 const details = [child.username, child.class_level].filter(Boolean).join(' · ');
                 return (
-                  <SelectItem key={String(child.id)} textValue={child.name}>
+                  <SelectItem key={String(child.id)} textValue={child.name} className="text-ink data-[hover=true]:bg-clay/60">
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-ink">{child.name}</span>
                       {details && <span className="text-xs text-muted-foreground">{details}</span>}

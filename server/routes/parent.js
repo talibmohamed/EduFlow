@@ -14,27 +14,27 @@ function validateCreate(body) {
   const { name, username, pin, age, class_level: classLevel } = body;
 
   if (typeof name !== 'string' || name.trim().length < 2 || name.trim().length > 120) {
-    return 'name invalid';
+    return 'Le prénom est invalide (2 à 120 caractères)';
   }
   if (typeof username !== 'string') {
-    return 'username invalid';
+    return "L'identifiant est invalide (3 à 60 caractères : lettres, chiffres, tirets)";
   }
   const trimmedUsername = username.trim().toLowerCase();
   if (trimmedUsername.length < 3 || trimmedUsername.length > 60 || !usernamePattern.test(trimmedUsername)) {
-    return 'username invalid';
+    return "L'identifiant est invalide (3 à 60 caractères : lettres, chiffres, tirets)";
   }
   if (typeof pin !== 'string' || !pinPattern.test(pin)) {
-    return 'PIN must be 4 digits';
+    return 'Le code PIN doit comporter 4 chiffres';
   }
   if (age !== undefined && age !== null && age !== '') {
     const ageNum = Number(age);
     if (!Number.isInteger(ageNum) || ageNum < 4 || ageNum > 18) {
-      return 'age invalid (must be 4-18)';
+      return "L'âge doit être compris entre 4 et 18 ans";
     }
   }
   if (classLevel !== undefined && classLevel !== null && classLevel !== '') {
     if (typeof classLevel !== 'string' || classLevel.trim().length > 40) {
-      return 'class_level invalid';
+      return 'La classe est invalide (40 caractères maximum)';
     }
   }
 
@@ -68,7 +68,7 @@ router.get('/children', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Erreur serveur, réessaie dans un instant' });
   }
 });
 
@@ -112,7 +112,7 @@ router.post('/children', async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Child created',
+      message: 'Enfant ajouté',
       data: {
         child: {
           id: childRow.id,
@@ -126,10 +126,10 @@ router.post('/children', async (req, res) => {
   } catch (error) {
     await client.query('ROLLBACK');
     if (error.code === '23505') {
-      return res.status(409).json({ success: false, message: 'Username already taken' });
+      return res.status(409).json({ success: false, message: 'Cet identifiant est déjà utilisé' });
     }
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Erreur serveur, réessaie dans un instant' });
   } finally {
     client.release();
   }
@@ -147,7 +147,7 @@ router.get('/children/:id/daily-states', async (req, res) => {
       [childId, req.user.id],
     );
     if (check.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Child not found' });
+      return res.status(404).json({ success: false, message: 'Enfant introuvable' });
     }
 
     const result = await pool.query(
@@ -164,7 +164,7 @@ router.get('/children/:id/daily-states', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Erreur serveur, réessaie dans un instant' });
   }
 });
 
@@ -180,7 +180,7 @@ router.get('/children/:id/progress', async (req, res) => {
       [childId, req.user.id],
     );
     if (check.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Child not found' });
+      return res.status(404).json({ success: false, message: 'Enfant introuvable' });
     }
 
 
@@ -217,7 +217,7 @@ router.get('/children/:id/progress', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({ success: false, message: 'Erreur serveur, réessaie dans un instant' });
   }
 });
 
