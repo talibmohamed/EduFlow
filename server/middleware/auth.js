@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const authError = { success: false, message: 'Authentication required' };
+const authError = { success: false, message: 'Authentification requise' };
 
 export function requireAuth(req, res, next) {
   const header = req.get('Authorization');
@@ -23,7 +23,7 @@ export function requireAuth(req, res, next) {
 export function requireRole(...allowedRoles) {
   return (req, res, next) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: 'Forbidden' });
+      return res.status(403).json({ success: false, message: 'Accès refusé' });
     }
 
     return next();
