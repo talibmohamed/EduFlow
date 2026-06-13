@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.use(requireAuth, requireRole('teacher'));
 
+const usernamePattern = /^[a-z0-9_-]+$/;
+
 // C3: GET /api/teacher/children
 router.get('/children', async (req, res) => {
   try {
@@ -20,6 +22,60 @@ router.get('/children', async (req, res) => {
     );
     return res.status(200).json({ success: true, data: { children: result.rows } });
   } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /api/teacher/children — claim an existing child by username
+router.post('/children', async (req, res) => {
+  if (typeof req.body.username !== 'string') {
+    return res.status(400).json({ success: false, message: 'Identifiant invalide.' });
+  }
+
+  const username = req.body.username.trim().toLowerCase();
+  if (username.length < 3 || username.length > 60 || !usernamePattern.test(username)) {
+    return res.status(400).json({ success: false, message: 'Identifiant invalide.' });
+  }
+
+  try {
+    const userResult = await pool.query(
+      'SELECT id, name, role FROM users WHERE username = $1',
+      [username],
+    );
+
+    if (userResult.rows.length === 0 || userResult.rows[0].role !== 'child') {
+      return res.status(404).json({
+        success: false,
+        message: 'Aucun élève trouvé pour cet identifiant.',
+      });
+    }
+
+    const childId = userResult.rows[0].id;
+    await pool.query(
+      'INSERT INTO teacher_children (teacher_id, child_id) VALUES ($1, $2)',
+      [req.user.id, childId],
+    );
+
+    const childResult = await pool.query(
+      `SELECT u.id, u.name, u.email, cp.age, cp.class_level
+       FROM users u
+       LEFT JOIN children_profiles cp ON cp.user_id = u.id
+       WHERE u.id = $1`,
+      [childId],
+    );
+
+    return res.status(201).json({
+      success: true,
+      data: { child: childResult.rows[0] },
+    });
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        success: false,
+        message: 'Cet élève est déjà dans ta classe.',
+      });
+    }
     console.error(error);
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }

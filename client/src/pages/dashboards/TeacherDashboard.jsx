@@ -1,4 +1,14 @@
 import { useEffect, useState } from 'react';
+import {
+  Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from '@heroui/react';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,6 +16,7 @@ import { EmptyState, HomeworkCard } from '../../components/ui';
 import api from '../../lib/api';
 
 const DIFFICULTY_LABEL_FR = { easy: 'Facile', medium: 'Moyenne', hard: 'Difficile' };
+const USERNAME_PATTERN = /^[a-z0-9_-]+$/;
 
 function ChildCardSkeleton() {
   return (
@@ -38,8 +49,105 @@ function HomeworkCardSkeleton() {
   );
 }
 
+function AddStudentModal({ isOpen, onClose, onAdded }) {
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const isValid = username.length >= 3 && username.length <= 60 && USERNAME_PATTERN.test(username);
+
+  function reset() {
+    setUsername('');
+    setError('');
+    setSubmitting(false);
+  }
+
+  function handleUsernameChange(value) {
+    setUsername(value.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 60));
+    setError('');
+  }
+
+  function handleClose() {
+    if (submitting) return;
+    reset();
+    onClose();
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (submitting || !isValid) return;
+
+    setError('');
+    setSubmitting(true);
+    try {
+      const res = await api.post('/api/teacher/children', { username });
+      onAdded(res.data.data.child);
+      reset();
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || "Impossible d'ajouter cet élève pour le moment.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} placement="center" size="md" backdrop="blur">
+      <ModalContent className="bg-card text-ink">
+        <ModalHeader className="flex flex-col gap-2">
+          <span className="font-display text-2xl text-ink">Ajouter un élève</span>
+          <span className="text-sm font-normal leading-relaxed text-muted-foreground">
+            Saisis l'identifiant de l'élève. Demande-le à son parent si tu ne l'as pas.
+          </span>
+        </ModalHeader>
+        <ModalBody>
+          <form id="add-student-form" className="flex flex-col gap-5" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-xl border border-border/60 bg-clay/40 p-3 text-sm font-medium text-ink">
+                {error}
+              </div>
+            )}
+            <Input
+              autoFocus
+              isRequired
+              label="Identifiant"
+              description="Lettres, chiffres, tirets uniquement. 3 à 60 caractères."
+              placeholder="lucas"
+              value={username}
+              onValueChange={handleUsernameChange}
+              variant="bordered"
+              radius="lg"
+              classNames={{
+                inputWrapper: 'min-h-11 border-border bg-card',
+                label: 'text-ink',
+                description: 'text-muted-foreground',
+              }}
+            />
+          </form>
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="light" onPress={handleClose} isDisabled={submitting} className="min-h-11 text-ink">
+            Annuler
+          </Button>
+          <Button
+            color="primary"
+            type="submit"
+            form="add-student-form"
+            isDisabled={!isValid || submitting}
+            isLoading={submitting}
+            className="min-h-11"
+          >
+            Ajouter
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}
+
 export default function TeacherDashboard() {
   const { user } = useAuth();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [children, setChildren] = useState([]);
   const [homework, setHomework] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +170,10 @@ export default function TeacherDashboard() {
     }
     load();
   }, []);
+
+  function handleAdded(child) {
+    setChildren((prev) => [...prev, child].sort((a, b) => a.name.localeCompare(b.name)));
+  }
 
   return (
     <div className="flex min-h-screen flex-col selection:bg-[var(--sky)] selection:text-white" style={{ background: 'var(--linen)' }}>
@@ -92,8 +204,11 @@ export default function TeacherDashboard() {
 
         {/* Children list */}
         <div className="paper-card animate-rise" style={{ animationDelay: '100ms' }}>
-          <div className="border-b border-border/40 p-6 sm:p-8">
+          <div className="border-b border-border/40 p-6 sm:p-8 flex items-center justify-between gap-3">
             <h2 className="font-display text-2xl text-ink">Mes élèves assignés</h2>
+            <Button size="sm" color="primary" onPress={onOpen} className="min-h-11 flex-shrink-0">
+              + Ajouter un élève
+            </Button>
           </div>
 
           <div className="p-6 sm:p-8">
@@ -174,6 +289,7 @@ export default function TeacherDashboard() {
         </div>
 
       </main>
+      <AddStudentModal isOpen={isOpen} onClose={onClose} onAdded={handleAdded} />
     </div>
   );
 }
